@@ -1,5 +1,7 @@
 # IF7SPORTS Admin Dashboard
 
+**Live review link: https://if7sports-admin-dashboard.vercel.app**
+
 Coded UI design for the IF7SPORTS sports facility booking admin dashboard, built for the
 Spanish speaking market. The panel is used by facility owners (dueños de polideportivos) to
 manage courts, bookings, prices, blocked slots, clients and metrics.
@@ -68,17 +70,22 @@ bookings calendar, clients list and metrics screens. Mobile is out of scope.
 ## Repo layout
 
 ```
-app/            screens
-components/     UI components
-lib/tokens.css  design tokens
-lib/mock-data/  hardcoded data
+source-code/     the Next.js app, and nothing else
+deliverables/    everything handed to the client
+  screenshots/     every screen, desktop and tablet
+docs/            working notes and decisions
+assets/          raw source assets
 ```
 
 ## Getting started
 
 ```bash
+cd source-code
 npm install
 npm run dev
 ```
 
 Then open http://localhost:3000
+
+See `source-code/README.md` for the review panel, the conventions and the
+notes for the build team.
