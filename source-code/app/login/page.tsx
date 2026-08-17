@@ -71,7 +71,7 @@ function PanelIzquierdo() {
 
       <div className="relative flex h-full flex-col justify-between p-10">
         <div className="flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded bg-cesped-900/60">
+          <span className="flex size-10 items-center justify-center rounded bg-cal-50">
             <Marca className="size-7" />
           </span>
           <div>
@@ -100,7 +100,7 @@ export default function LoginPage() {
   const [codigo, setCodigo] = React.useState('')
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-[minmax(0,440px)_1fr]">
+    <div className="grid min-h-screen grid-rows-1 lg:grid-cols-[minmax(0,440px)_1fr]">
       <main className="flex flex-col justify-center px-6 py-10 sm:px-12">
         <div className="mx-auto w-full max-w-sm">
           {/* mark, shown here only when the left panel is hidden */}
