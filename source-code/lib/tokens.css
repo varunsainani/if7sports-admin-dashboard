@@ -178,10 +178,10 @@
 
   /* Single-hue ramp for magnitude: the occupancy heatmap and the bar chart.
      Sequential means one hue light to dark, never a rainbow. */
-  --grafico-seq-1: #e3efec;
-  --grafico-seq-2: #b9d8d0;
-  --grafico-seq-3: #7fbcaf;
-  --grafico-seq-4: #3f9a86;
+  --grafico-seq-1: #e8efe9;
+  --grafico-seq-2: #bcd8cd;
+  --grafico-seq-3: #83bdab;
+  --grafico-seq-4: #429c83;
   --grafico-seq-5: #0e7761;
   --grafico-seq-6: #075243;
 
