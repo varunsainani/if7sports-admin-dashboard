@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    // ES2017 rather than the create-next-app default of ES5. Map and Set
+    // entries are iterated directly in the metrics calculations, which ES5
+    // cannot express without downlevelIteration. Every browser Next 14
+    // supports handles ES2017 natively.
+    "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
