@@ -2,26 +2,170 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  * {
+    border-color: var(--borde);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--fondo);
+    color: var(--tinta);
+    font-family: var(--fuente-texto);
+    font-size: var(--texto-base);
+    line-height: var(--interlineado-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--fuente-display);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--interlineado-ajustado);
+    font-weight: 600;
+  }
+
+  /* Times, money and identifiers align in columns when they are monospaced,
+     which matters on every table and on the calendar. */
+  time,
+  code,
+  kbd {
+    font-family: var(--fuente-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Keyboard focus must be visible everywhere. Part of the quality floor,
+     not a per-component decision. */
+  :focus-visible {
+    outline: 2px solid var(--primario);
+    outline-offset: 2px;
+    border-radius: var(--radio-sm);
+  }
+
+  ::selection {
+    background-color: var(--cesped-100);
+    color: var(--cesped-900);
+  }
+
+  /* Spanish copy runs longer than English. Prevent awkward breaks in headings. */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* ------------------------------------------------------------- bloqueos
+     A blocked franja reads as a taped-off section of court. The hatch is the
+     brief's required "patrón visual distinto" and costs no extra hue. */
+  .trama-bloqueo {
+    background-color: var(--bloqueo-base);
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent 0,
+      transparent 5px,
+      var(--bloqueo-trama) 5px,
+      var(--bloqueo-trama) 7px
+    );
+  }
+
+  /* -------------------------------------------------------- cancelled slot
+     Struck through rather than merely tinted, so a cancelled booking is
+     unmistakable even in a greyscale screenshot. */
+  .trama-cancelada {
+    background-image: linear-gradient(
+      to bottom right,
+      transparent calc(50% - 0.5px),
+      var(--cancelada-borde) calc(50% - 0.5px),
+      var(--cancelada-borde) calc(50% + 0.5px),
+      transparent calc(50% + 0.5px)
+    );
+  }
+
+  /* --------------------------------------------------------- chalk gridline
+     The calendar's hour rules, drawn like court markings rather than as a
+     generic table border. */
+  .linea-cancha {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      var(--borde) 0,
+      var(--borde) 1px,
+      transparent 1px,
+      transparent 100%
+    );
+  }
+
+  /* ----------------------------------------------------------- skeletons */
+  .esqueleto {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--cal-200);
+    border-radius: var(--radio-sm);
+  }
+
+  .esqueleto::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent 0,
+      rgba(255, 255, 255, 0.55) 50%,
+      transparent 100%
+    );
+    animation: brillo 1.6s infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .esqueleto::after {
+      animation: none;
+    }
+  }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  /* Sidebar group labels and table eyebrows. */
+  .etiqueta {
+    font-family: var(--fuente-display);
+    font-size: var(--texto-2xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-etiqueta);
+    text-transform: uppercase;
+    color: var(--apagado);
+  }
+
+  .numeros-tabulares {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* A restrained scrollbar. The default on Linux and Windows is heavy enough to
+   distort the density of the tables. */
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--cal-300);
+    border-radius: var(--radio-full);
+    border: 3px solid var(--fondo);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--cal-400);
   }
 }
