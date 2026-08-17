@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
-import { KeyRound, MoreHorizontal, Pencil, Plus, ShieldCheck, UserX } from 'lucide-react'
+import { KeyRound, MoreHorizontal, Pencil, Plus, Search, ShieldCheck, UserX } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import type { Modulo, Permisos, Usuario } from '@/lib/types'
@@ -222,7 +222,17 @@ export default function UsuariosPage() {
   const [modalAbierto, setModalAbierto] = React.useState(false)
   const [editando, setEditando] = React.useState<Usuario | null>(null)
 
-  const datos = estadoVista === 'empty' ? [] : usuarios
+  const [busqueda, setBusqueda] = React.useState('')
+
+  const datos = React.useMemo(() => {
+    if (estadoVista === 'empty') return []
+    const termino = busqueda.trim().toLowerCase()
+    if (!termino) return usuarios
+    return usuarios.filter(
+      (u) =>
+        u.nombre.toLowerCase().includes(termino) || u.correo.toLowerCase().includes(termino)
+    )
+  }, [busqueda, estadoVista])
 
   function abrirModal(usuario: Usuario | null) {
     setEditando(usuario)
@@ -357,6 +367,21 @@ export default function UsuariosPage() {
         columns={columns}
         data={datos}
         estado={estadoVista}
+        toolbar={
+          <>
+            <Input
+              value={busqueda}
+              onChange={(evento) => setBusqueda(evento.target.value)}
+              placeholder="Buscar por nombre o correo"
+              aria-label="Buscar usuarios"
+              iconoIzquierda={<Search />}
+              className="h-8 w-64 text-xs"
+            />
+            <span className="ml-auto text-2xs text-apagado numeros-tabulares">
+              {datos.length} {datos.length === 1 ? 'usuario' : 'usuarios'}
+            </span>
+          </>
+        }
         vacio={
           <EmptyState
             ilustracion="lista"

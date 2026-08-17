@@ -157,7 +157,7 @@ export default function CanchasPage() {
           <Button
             onClick={() =>
               toast.info('Formulario de nueva cancha', {
-                descripcion: 'En el prototipo esta acción abriría el alta de cancha.',
+                descripcion: 'Aquí se abriría el formulario de alta de cancha.',
               })
             }
           >
@@ -226,7 +226,7 @@ export default function CanchasPage() {
               <Button
                 onClick={() =>
                   toast.info('Formulario de nueva cancha', {
-                    descripcion: 'En el prototipo esta acción abriría el alta de cancha.',
+                    descripcion: 'Aquí se abriría el formulario de alta de cancha.',
                   })
                 }
               >

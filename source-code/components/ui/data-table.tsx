@@ -63,6 +63,26 @@ export function DataTable<TData>({
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
 
+  /* Tracks whether the table is currently scrolled short of its right edge, so
+     the fade appears only when content is genuinely hidden. */
+  const contenedorRef = React.useRef<HTMLDivElement>(null)
+  const [desbordaDerecha, setDesbordaDerecha] = React.useState(false)
+
+  const medirDesborde = React.useCallback(() => {
+    const nodo = contenedorRef.current
+    if (!nodo) return
+    setDesbordaDerecha(nodo.scrollWidth - nodo.clientWidth - nodo.scrollLeft > 4)
+  }, [])
+
+  React.useEffect(() => {
+    medirDesborde()
+    const nodo = contenedorRef.current
+    if (!nodo || typeof ResizeObserver === 'undefined') return
+    const observador = new ResizeObserver(medirDesborde)
+    observador.observe(nodo)
+    return () => observador.disconnect()
+  }, [medirDesborde, data, sorting])
+
   const table = useReactTable({
     data,
     columns,
@@ -92,99 +112,112 @@ export function DataTable<TData>({
       ) : sinResultados ? (
         vacio
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
-            <caption className="sr-only">{descripcion}</caption>
-            <thead>
-              {table.getHeaderGroups().map((grupo) => (
-                <tr key={grupo.id} className="border-b border-borde bg-superficie-alt">
-                  {grupo.headers.map((header) => {
-                    const puedeOrdenar = header.column.getCanSort()
-                    const orden = header.column.getIsSorted()
+        <div className="relative">
+          {/* Shown only while there is more table to the right. Without it a
+              header clipped mid-word at the card border reads as a rendering
+              fault instead of an invitation to scroll. Always-on would dim the
+              last column on wide screens, where nothing is hidden at all. */}
+          {desbordaDerecha && (
+            <div
+              className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-superficie to-transparent"
+              aria-hidden
+            />
+          )}
 
-                    return (
-                      <th
-                        key={header.id}
-                        scope="col"
-                        aria-sort={
-                          orden === 'asc'
-                            ? 'ascending'
-                            : orden === 'desc'
-                              ? 'descending'
-                              : puedeOrdenar
-                                ? 'none'
-                                : undefined
-                        }
-                        className={cn(
-                          'whitespace-nowrap px-4 py-2.5',
-                          (header.column.columnDef.meta as MetaColumna | undefined)?.numerica
-                            ? 'text-right'
-                            : 'text-left'
-                        )}
-                      >
-                        {header.isPlaceholder ? null : puedeOrdenar ? (
-                          <button
-                            type="button"
-                            onClick={header.column.getToggleSortingHandler()}
-                            className={cn(
-                              'etiqueta inline-flex items-center gap-1.5 rounded',
-                              (header.column.columnDef.meta as MetaColumna | undefined)?.numerica &&
-                                'flex-row-reverse',
-                              'transition-colors duration-rapida hover:text-tinta',
-                              orden && 'text-tinta'
-                            )}
-                          >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                            {orden === 'asc' ? (
-                              <ArrowUp className="size-3" aria-hidden />
-                            ) : orden === 'desc' ? (
-                              <ArrowDown className="size-3" aria-hidden />
-                            ) : (
-                              <ChevronsUpDown className="size-3 opacity-40" aria-hidden />
-                            )}
-                          </button>
-                        ) : (
-                          <span className="etiqueta">
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                          </span>
-                        )}
-                      </th>
-                    )
-                  })}
-                </tr>
-              ))}
-            </thead>
+          <div ref={contenedorRef} className="overflow-x-auto" onScroll={medirDesborde}>
+            <table className="w-full border-collapse text-sm">
+              <caption className="sr-only">{descripcion}</caption>
+              <thead>
+                {table.getHeaderGroups().map((grupo) => (
+                  <tr key={grupo.id} className="border-b border-borde bg-superficie-alt">
+                    {grupo.headers.map((header) => {
+                      const puedeOrdenar = header.column.getCanSort()
+                      const orden = header.column.getIsSorted()
 
-            <tbody>
-              {filas.map((fila) => (
-                <tr
-                  key={fila.id}
-                  onClick={onFilaClick ? () => onFilaClick(fila.original) : undefined}
-                  tabIndex={onFilaClick ? 0 : undefined}
-                  onKeyDown={
-                    onFilaClick
-                      ? (evento) => {
-                          if (evento.key === 'Enter' || evento.key === ' ') {
-                            evento.preventDefault()
-                            onFilaClick(fila.original)
+                      return (
+                        <th
+                          key={header.id}
+                          scope="col"
+                          aria-sort={
+                            orden === 'asc'
+                              ? 'ascending'
+                              : orden === 'desc'
+                                ? 'descending'
+                                : puedeOrdenar
+                                  ? 'none'
+                                  : undefined
                           }
-                        }
-                      : undefined
-                  }
-                  className={cn(
-                    'border-b border-borde last:border-0 transition-colors duration-rapida',
-                    onFilaClick && 'cursor-pointer hover:bg-cesped-50 focus-visible:bg-cesped-50'
-                  )}
-                >
-                  {fila.getVisibleCells().map((celda) => (
-                    <td key={celda.id} className="px-4 py-3 align-middle text-tinta">
-                      {flexRender(celda.column.columnDef.cell, celda.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                          className={cn(
+                            'whitespace-nowrap px-4 py-2.5',
+                            (header.column.columnDef.meta as MetaColumna | undefined)?.numerica
+                              ? 'text-right'
+                              : 'text-left'
+                          )}
+                        >
+                          {header.isPlaceholder ? null : puedeOrdenar ? (
+                            <button
+                              type="button"
+                              onClick={header.column.getToggleSortingHandler()}
+                              className={cn(
+                                'etiqueta inline-flex items-center gap-1.5 rounded',
+                                (header.column.columnDef.meta as MetaColumna | undefined)?.numerica &&
+                                  'flex-row-reverse',
+                                'transition-colors duration-rapida hover:text-tinta',
+                                orden && 'text-tinta'
+                              )}
+                            >
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                              {orden === 'asc' ? (
+                                <ArrowUp className="size-3" aria-hidden />
+                              ) : orden === 'desc' ? (
+                                <ArrowDown className="size-3" aria-hidden />
+                              ) : (
+                                <ChevronsUpDown className="size-3 opacity-40" aria-hidden />
+                              )}
+                            </button>
+                          ) : (
+                            <span className="etiqueta">
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                            </span>
+                          )}
+                        </th>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </thead>
+
+              <tbody>
+                {filas.map((fila) => (
+                  <tr
+                    key={fila.id}
+                    onClick={onFilaClick ? () => onFilaClick(fila.original) : undefined}
+                    tabIndex={onFilaClick ? 0 : undefined}
+                    onKeyDown={
+                      onFilaClick
+                        ? (evento) => {
+                            if (evento.key === 'Enter' || evento.key === ' ') {
+                              evento.preventDefault()
+                              onFilaClick(fila.original)
+                            }
+                          }
+                        : undefined
+                    }
+                    className={cn(
+                      'border-b border-borde last:border-0 transition-colors duration-rapida',
+                      onFilaClick && 'cursor-pointer hover:bg-cesped-50 focus-visible:bg-cesped-50'
+                    )}
+                  >
+                    {fila.getVisibleCells().map((celda) => (
+                      <td key={celda.id} className="px-4 py-3 align-middle text-tinta">
+                        {flexRender(celda.column.columnDef.cell, celda.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

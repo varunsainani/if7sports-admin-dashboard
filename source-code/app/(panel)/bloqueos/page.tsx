@@ -216,7 +216,7 @@ export default function BloqueosPage() {
           const config = MOTIVO_BLOQUEO[row.original.motivo]
           const Icono = config.icono
           return (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-cal-200 px-2 py-0.5 text-2xs text-cal-800">
+            <span className="trama-bloqueo inline-flex items-center gap-1.5 rounded-full border border-borde-fuerte px-2 py-0.5 text-2xs text-bloqueo-texto">
               <Icono className="size-3" aria-hidden />
               {config.etiqueta}
             </span>

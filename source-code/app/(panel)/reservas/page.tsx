@@ -393,7 +393,7 @@ function CalendarioReservas() {
           <Button
             onClick={() =>
               toast.info('Formulario de nueva reserva', {
-                descripcion: 'En el prototipo esta acción abriría el alta manual de reserva.',
+                descripcion: 'Aquí se abriría el formulario de alta manual de reserva.',
               })
             }
           >
@@ -498,7 +498,7 @@ function CalendarioReservas() {
                 <Button
                   onClick={() =>
                     toast.info('Formulario de nueva reserva', {
-                      descripcion: 'En el prototipo esta acción abriría el alta manual de reserva.',
+                      descripcion: 'Aquí se abriría el formulario de alta manual de reserva.',
                     })
                   }
                 >

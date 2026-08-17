@@ -80,11 +80,11 @@ function PanelIzquierdo() {
           </div>
         </div>
 
-        <div>
-          <p className="max-w-sm font-display text-2xl font-semibold leading-tight tracking-display text-white">
+        <div className="rounded-lg bg-cesped-900/45 p-5 backdrop-blur-[2px]">
+          <p className="max-w-[26rem] font-display text-2xl font-semibold leading-tight tracking-display text-white">
             Tus canchas, tus reservas y tus cuentas en una sola pantalla.
           </p>
-          <p className="mt-3 max-w-sm text-sm text-cesped-100">
+          <p className="mt-3 max-w-[26rem] text-sm text-cesped-100">
             Gestiona canchas, horarios, precios y clientes del {polideportivo.nombre}.
           </p>
         </div>
