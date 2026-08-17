@@ -11,6 +11,7 @@ import { fechaHora, fechaLarga } from '@/lib/formato'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/controls'
 import { Campo, Input } from '@/components/ui/input'
+import { SelectorHora } from '@/components/ui/selector-hora'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { PageHeaderSkeleton, Section } from '@/components/ui/page'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -197,18 +198,29 @@ export default function ConfiguracionPage() {
 
                   {horario.abierto ? (
                     <div className="flex items-center gap-2">
-                      <Input
-                        type="time"
-                        defaultValue={horario.apertura}
-                        aria-label={`Hora de apertura del ${dia.largo}`}
-                        className="h-8 w-28 text-xs"
+                      {/* Controlled, and written to the same state the toggle
+                          uses. Uncontrolled fields lost every typed edit as
+                          soon as the day was switched off and back on. */}
+                      <SelectorHora
+                        valor={horario.apertura}
+                        onCambio={(valor) =>
+                          setHorarios((actual) =>
+                            actual.map((h) =>
+                              h.dia === horario.dia ? { ...h, apertura: valor } : h
+                            )
+                          )
+                        }
+                        etiqueta={`Hora de apertura del ${dia.largo}`}
                       />
                       <span className="text-xs text-apagado">a</span>
-                      <Input
-                        type="time"
-                        defaultValue={horario.cierre}
-                        aria-label={`Hora de cierre del ${dia.largo}`}
-                        className="h-8 w-28 text-xs"
+                      <SelectorHora
+                        valor={horario.cierre}
+                        onCambio={(valor) =>
+                          setHorarios((actual) =>
+                            actual.map((h) => (h.dia === horario.dia ? { ...h, cierre: valor } : h))
+                          )
+                        }
+                        etiqueta={`Hora de cierre del ${dia.largo}`}
                       />
                     </div>
                   ) : (

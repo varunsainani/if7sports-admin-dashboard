@@ -26,6 +26,11 @@ import { SkeletonTabla } from './skeleton'
  * shifting underneath.
  */
 
+/** Per-column options. `numerica` right-aligns the header and its cells. */
+export interface MetaColumna {
+  numerica?: boolean
+}
+
 export interface DataTableProps<TData> {
   columns: ColumnDef<TData, unknown>[]
   data: TData[]
@@ -110,7 +115,12 @@ export function DataTable<TData>({
                                 ? 'none'
                                 : undefined
                         }
-                        className="whitespace-nowrap px-4 py-2.5 text-left"
+                        className={cn(
+                          'whitespace-nowrap px-4 py-2.5',
+                          (header.column.columnDef.meta as MetaColumna | undefined)?.numerica
+                            ? 'text-right'
+                            : 'text-left'
+                        )}
                       >
                         {header.isPlaceholder ? null : puedeOrdenar ? (
                           <button
@@ -118,6 +128,8 @@ export function DataTable<TData>({
                             onClick={header.column.getToggleSortingHandler()}
                             className={cn(
                               'etiqueta inline-flex items-center gap-1.5 rounded',
+                              (header.column.columnDef.meta as MetaColumna | undefined)?.numerica &&
+                                'flex-row-reverse',
                               'transition-colors duration-rapida hover:text-tinta',
                               orden && 'text-tinta'
                             )}
@@ -196,7 +208,7 @@ function Paginacion<TData>({ table }: { table: ReturnType<typeof useReactTable<T
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-borde px-4 py-3">
       <p className="text-xs text-apagado numeros-tabulares">
-        Mostrando {desde} a {hasta} de {totalFilas}
+        Mostrando del {desde} al {hasta} de {totalFilas}
       </p>
 
       <div className="flex items-center gap-2">
@@ -247,8 +259,19 @@ export function CeldaPrincipal({
   )
 }
 
+/**
+ * Money and counts. Right aligned, because tabular figures only line up their
+ * decimal points and currency signs against a right edge; left aligned they are
+ * just a mono font doing nothing.
+ *
+ * Pair with `alinearDerecha` on the matching column header.
+ */
 export function CeldaNumerica({ children }: { children: React.ReactNode }) {
-  return <span className="font-mono text-sm numeros-tabulares text-tinta">{children}</span>
+  return (
+    <span className="block text-right font-mono text-sm numeros-tabulares text-tinta">
+      {children}
+    </span>
+  )
 }
 
 export function CeldaApagada({ children }: { children: React.ReactNode }) {

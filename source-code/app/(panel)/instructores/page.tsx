@@ -118,7 +118,7 @@ function ModalInstructor({
           <Button
             onClick={() => {
               onOpenChange(false)
-              toast.exito(editando ? 'Instructor actualizado' : 'Instructor creado')
+              toast.exito(editando ? 'Cambios guardados' : 'Instructor creado')
             }}
           >
             {editando ? 'Guardar cambios' : 'Crear instructor'}
@@ -138,8 +138,15 @@ export default function InstructoresPage() {
 
   const datos = React.useMemo(() => {
     if (estadoVista === 'empty') return []
-    return instructores.filter((i) => tipo === 'todos' || i.tipo === tipo)
-  }, [tipo, estadoVista])
+    const termino = busqueda.trim().toLowerCase()
+
+    return instructores.filter((i) => {
+      if (termino && !i.nombre.toLowerCase().includes(termino)) return false
+      return tipo === 'todos' || i.tipo === tipo
+    })
+  }, [busqueda, tipo, estadoVista])
+
+  const hayFiltros = tipo !== 'todos' || busqueda.length > 0
 
   function abrirModal(instructor: Instructor | null) {
     setEditando(instructor)
@@ -239,7 +246,6 @@ export default function InstructoresPage() {
         columns={columns}
         data={datos}
         estado={estadoVista}
-        busqueda={busqueda}
         toolbar={
           <>
             <Input
@@ -269,14 +275,35 @@ export default function InstructoresPage() {
         }
         vacio={
           <EmptyState
-            ilustracion="lista"
-            titulo="Todavía no hay instructores"
-            descripcion="Da de alta a los monitores y entrenadores para poder asociarlos a las franjas que bloquees."
+            ilustracion={hayFiltros ? 'busqueda' : 'lista'}
+            titulo={
+              hayFiltros
+                ? 'Ningún instructor coincide con la búsqueda'
+                : 'Todavía no hay instructores'
+            }
+            descripcion={
+              hayFiltros
+                ? 'Prueba con otro nombre o quita los filtros para ver a todo el equipo.'
+                : 'Da de alta a los monitores y entrenadores para poder asociarlos a las franjas que bloquees.'
+            }
             accion={
               <Button onClick={() => abrirModal(null)}>
                 <Plus aria-hidden />
                 Nuevo instructor
               </Button>
+            }
+            accionSecundaria={
+              hayFiltros ? (
+                <Button
+                  variant="secundario"
+                  onClick={() => {
+                    setBusqueda('')
+                    setTipo('todos')
+                  }}
+                >
+                  Quitar filtros
+                </Button>
+              ) : undefined
             }
           />
         }

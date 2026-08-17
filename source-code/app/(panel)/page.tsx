@@ -14,7 +14,7 @@ import {
 
 import { cn } from '@/lib/utils'
 import type { Reserva } from '@/lib/types'
-import { useEstadoVista } from '@/lib/demo-context'
+import { useDemo, useEstadoVista } from '@/lib/demo-context'
 import {
   HOY,
   bloqueosDeFecha,
@@ -23,7 +23,8 @@ import {
   resumenDashboard,
   ultimasReservas,
 } from '@/lib/mock-data'
-import { ESTADO_RESERVA, TIPO_CANCHA } from '@/lib/estados'
+import { ESTADO_RESERVA } from '@/lib/estados'
+import { IconoCancha } from '@/components/ui/icono-cancha'
 import { capitalizar, euros, eurosCompacto, fechaConDia, numero, porcentaje } from '@/lib/formato'
 import { Button } from '@/components/ui/button'
 import { BadgePago, BadgeReserva } from '@/components/ui/badge'
@@ -43,8 +44,8 @@ import { BookingDetailModal } from '@/components/reservas/booking-detail-modal'
  * and a fill treatment. Blocked franjas are hatched like taped-off court.
  */
 
-/** Hours the day strip covers. Matches the facility's operating window. */
-const HORAS = [9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21, 22]
+/** Hours the day strip covers. Continuous, matching the facility's window. */
+const HORAS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
 
 function TiraDelDia({ onAbrirReserva }: { onAbrirReserva: (reserva: Reserva) => void }) {
   const reservas = reservasDeHoy
@@ -54,7 +55,7 @@ function TiraDelDia({ onAbrirReserva }: { onAbrirReserva: (reserva: Reserva) => 
     <div className="overflow-x-auto">
       <div className="min-w-[860px]">
         {/* hour ruler */}
-        <div className="mb-1 grid grid-cols-[132px_repeat(12,1fr)] gap-1">
+        <div className="mb-1 grid grid-cols-[132px_repeat(14,1fr)] gap-1">
           <span />
           {HORAS.map((hora) => (
             <span key={hora} className="text-center font-mono text-2xs text-apagado">
@@ -65,12 +66,10 @@ function TiraDelDia({ onAbrirReserva }: { onAbrirReserva: (reserva: Reserva) => 
 
         <div className="space-y-1">
           {canchasActivas.map((cancha) => {
-            const Icono = TIPO_CANCHA[cancha.tipo].icono
-
             return (
-              <div key={cancha.id} className="grid grid-cols-[132px_repeat(12,1fr)] gap-1">
+              <div key={cancha.id} className="grid grid-cols-[132px_repeat(14,1fr)] gap-1">
                 <div className="flex items-center gap-1.5 pr-2">
-                  <Icono className="size-3.5 shrink-0 text-cal-500" aria-hidden />
+                  <IconoCancha tipo={cancha.tipo} className="size-4 shrink-0 text-cal-500" />
                   <span className="truncate text-xs text-tinta-media">{cancha.nombre}</span>
                 </div>
 
@@ -137,13 +136,16 @@ function Leyenda() {
     <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-borde pt-3">
       {(['pendiente', 'confirmada', 'completada', 'cancelada'] as const).map((estado) => (
         <span key={estado} className="flex items-center gap-1.5 text-2xs text-apagado">
-          <span className={cn('size-3 rounded-sm', ESTADO_RESERVA[estado].slot)} aria-hidden />
+          <span
+            className={cn('size-3 rounded-sm border border-borde', ESTADO_RESERVA[estado].slot)}
+            aria-hidden
+          />
           {ESTADO_RESERVA[estado].etiqueta}
         </span>
       ))}
       <span className="flex items-center gap-1.5 text-2xs text-apagado">
         <span className="trama-bloqueo size-3 rounded-sm border border-borde-fuerte" aria-hidden />
-        Bloqueo
+        Franja bloqueada
       </span>
       <span className="flex items-center gap-1.5 text-2xs text-apagado">
         <span className="size-3 rounded-sm border border-dashed border-borde bg-cal-50" aria-hidden />
@@ -155,6 +157,7 @@ function Leyenda() {
 
 export default function DashboardPage() {
   const estadoVista = useEstadoVista()
+  const { puedeVer } = useDemo()
   const [reservaAbierta, setReservaAbierta] = React.useState<Reserva | null>(null)
   const [modalAbierto, setModalAbierto] = React.useState(false)
 
@@ -173,18 +176,23 @@ export default function DashboardPage() {
         descripcion={capitalizar(fechaConDia(HOY))}
         acciones={
           <>
-            <Button variant="secundario" asChild>
-              <Link href="/canchas">
-                <Trophy aria-hidden />
-                Gestionar canchas
-              </Link>
-            </Button>
-            <Button variant="secundario" asChild>
-              <Link href="/clientes">
-                <Users aria-hidden />
-                Ver clientes
-              </Link>
-            </Button>
+            {/* Only offer a shortcut the current user can actually follow. */}
+            {puedeVer('canchas') && (
+              <Button variant="secundario" asChild>
+                <Link href="/canchas">
+                  <Trophy aria-hidden />
+                  Gestionar canchas
+                </Link>
+              </Button>
+            )}
+            {puedeVer('clientes') && (
+              <Button variant="secundario" asChild>
+                <Link href="/clientes">
+                  <Users aria-hidden />
+                  Ver clientes
+                </Link>
+              </Button>
+            )}
             <Button asChild>
               <Link href="/reservas?nueva=1">
                 <CalendarPlus aria-hidden />
@@ -221,13 +229,13 @@ export default function DashboardPage() {
             <MetricCard
               etiqueta="Ocupación"
               valor={vacio ? '0 %' : porcentaje(resumenDashboard.ocupacion)}
-              nota="Media de los últimos 30 días"
+              nota="Media de este mes"
               icono={<Gauge />}
             />
             <MetricCard
               etiqueta="Clientes activos"
               valor={vacio ? '0' : numero(resumenDashboard.clientesActivos)}
-              nota="Con reserva en los últimos 30 días"
+              nota="Con reserva este mes"
               icono={<Users />}
             />
           </>
@@ -320,20 +328,25 @@ export default function DashboardPage() {
                       {reserva.id}
                     </span>
 
-                    <span className="min-w-0 flex-1">
+                    <span className="w-[300px] shrink-0">
                       <span className="block truncate text-base font-medium text-tinta">
                         {reserva.clienteNombre}
                       </span>
                       <span className="block truncate text-xs text-apagado">
-                        {reserva.canchaNombre} · {reserva.horaInicio} a {reserva.horaFin}
+                        {reserva.canchaNombre}
                       </span>
                     </span>
 
-                    <BadgeReserva estado={reserva.estado} />
-                    <BadgePago estado={reserva.estadoPago} soloIcono />
+                    <span className="w-32 shrink-0 font-mono text-xs text-tinta-media numeros-tabulares">
+                      {reserva.horaInicio} a {reserva.horaFin}
+                    </span>
 
-                    <span className="w-20 shrink-0 text-right font-mono text-sm text-tinta numeros-tabulares">
-                      {euros(reserva.importe)}
+                    <span className="ml-auto flex shrink-0 items-center gap-2.5">
+                      <BadgeReserva estado={reserva.estado} />
+                      <BadgePago estado={reserva.estadoPago} />
+                      <span className="w-20 text-right font-mono text-sm text-tinta numeros-tabulares">
+                        {euros(reserva.importe)}
+                      </span>
                     </span>
                   </button>
                 </li>

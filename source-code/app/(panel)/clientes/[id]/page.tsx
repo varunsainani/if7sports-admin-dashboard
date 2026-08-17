@@ -32,9 +32,22 @@ export default function ClienteDetallePage() {
 
   if (!cliente) notFound()
 
-  const historial = reservasDeCliente(cliente.id)
   const cargando = estadoVista === 'loading'
   const vacio = estadoVista === 'empty'
+
+  // Empty has to zero the counters too. Leaving them populated above an empty
+  // history panel makes the screen contradict itself.
+  const historial = vacio ? [] : reservasDeCliente(cliente.id)
+  const datos = vacio
+    ? {
+        ...cliente,
+        totalReservas: 0,
+        importeTotalPagado: 0,
+        reservasActivas: 0,
+        reservasCanceladas: 0,
+        reservasCompletadas: 0,
+      }
+    : cliente
 
   if (cargando) {
     return (
@@ -108,24 +121,26 @@ export default function ClienteDetallePage() {
           <Dato etiqueta="Teléfono">
             <span className="font-mono text-sm numeros-tabulares">{cliente.telefono}</span>
           </Dato>
-          <Dato etiqueta="Última reserva">{fechaCorta(cliente.fechaUltimaReserva)}</Dato>
+          <Dato etiqueta="Última reserva">
+            {vacio ? '—' : fechaCorta(cliente.fechaUltimaReserva)}
+          </Dato>
           <Dato etiqueta="Importe total pagado">
-            <span className="font-mono numeros-tabulares">{euros(cliente.importeTotalPagado)}</span>
+            <span className="font-mono numeros-tabulares">{euros(datos.importeTotalPagado)}</span>
           </Dato>
         </ListaDatos>
       </div>
 
       {/* -------------------------------------------------------- counters */}
       <div className="mb-8 grid gap-3 sm:grid-cols-3">
-        <Contador etiqueta="Reservas activas" valor={cliente.reservasActivas} tono="confirmada" />
+        <Contador etiqueta="Reservas activas" valor={datos.reservasActivas} tono="confirmada" />
         <Contador
           etiqueta="Reservas completadas"
-          valor={cliente.reservasCompletadas}
+          valor={datos.reservasCompletadas}
           tono="completada"
         />
         <Contador
           etiqueta="Reservas canceladas"
-          valor={cliente.reservasCanceladas}
+          valor={datos.reservasCanceladas}
           tono="cancelada"
         />
       </div>
@@ -133,14 +148,18 @@ export default function ClienteDetallePage() {
       {/* --------------------------------------------------------- history */}
       <Section
         titulo="Historial de reservas"
-        descripcion={`${cliente.totalReservas} reservas en total. Pulsa una fila para abrir el detalle.`}
+        descripcion={
+          vacio
+            ? 'Sin reservas registradas.'
+            : `${datos.totalReservas} reservas en total. Pulsa una fila para abrir el detalle.`
+        }
       >
         <div className="overflow-hidden rounded-lg border border-borde bg-superficie">
           {vacio || historial.length === 0 ? (
             <EmptyState
               ilustracion="cuadrante"
               titulo="Este cliente todavía no tiene reservas"
-              descripcion="Cuando reserve una pista, el historial completo aparecerá aquí con su estado y su importe."
+              descripcion="Cuando reserve una cancha, el historial completo aparecerá aquí con su estado y su importe."
             />
           ) : (
             <ul className="divide-y divide-borde">
@@ -165,7 +184,7 @@ export default function ClienteDetallePage() {
                       {fechaCorta(reserva.fecha)}
                     </span>
 
-                    <span className="min-w-0 flex-1">
+                    <span className="w-[260px] shrink-0">
                       <span className="block truncate text-base text-tinta">
                         {reserva.canchaNombre}
                       </span>
@@ -174,11 +193,12 @@ export default function ClienteDetallePage() {
                       </span>
                     </span>
 
-                    <BadgeReserva estado={reserva.estado} />
-                    <BadgePago estado={reserva.estadoPago} soloIcono />
-
-                    <span className="w-20 shrink-0 text-right font-mono text-sm text-tinta numeros-tabulares">
-                      {euros(reserva.importe)}
+                    <span className="ml-auto flex shrink-0 items-center gap-2.5">
+                      <BadgeReserva estado={reserva.estado} />
+                      <BadgePago estado={reserva.estadoPago} />
+                      <span className="w-20 text-right font-mono text-sm text-tinta numeros-tabulares">
+                        {euros(reserva.importe)}
+                      </span>
                     </span>
                   </button>
                 </li>

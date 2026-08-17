@@ -67,7 +67,7 @@ export function Sidebar({ plegado, onAlternar }: SidebarProps) {
         <Marca className="size-7 shrink-0" />
         {!plegado && (
           <div className="min-w-0">
-            <p className="truncate font-display text-sm font-semibold leading-tight text-tinta">
+            <p className="line-clamp-2 font-display text-xs font-semibold leading-tight text-tinta">
               {polideportivo.nombre}
             </p>
             <p className="truncate text-2xs text-apagado">IF7SPORTS</p>

@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { PageHeader } from '@/components/ui/page'
 import { Campo, Input, Textarea } from '@/components/ui/input'
+import { SelectorHora } from '@/components/ui/selector-hora'
 import {
   FiltroSelect,
   Select,
@@ -51,6 +52,8 @@ function ModalNuevoBloqueo({
   const [cancha, setCancha] = React.useState('')
   const [motivo, setMotivo] = React.useState('')
   const [instructor, setInstructor] = React.useState('ninguno')
+  const [horaInicio, setHoraInicio] = React.useState('18:00')
+  const [horaFin, setHoraFin] = React.useState('20:00')
 
   return (
     <Dialog open={abierto} onOpenChange={onOpenChange}>
@@ -83,12 +86,22 @@ function ModalNuevoBloqueo({
             <Input id="bloqueo-fecha" type="date" defaultValue={HOY} />
           </Campo>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Campo etiqueta="Hora de inicio" htmlFor="bloqueo-inicio" requerido>
-              <Input id="bloqueo-inicio" type="time" defaultValue="18:00" />
+          <div className="flex flex-wrap items-end gap-4">
+            <Campo etiqueta="Hora de inicio" htmlFor="bloqueo-inicio" requerido className="w-auto">
+              <SelectorHora
+                id="bloqueo-inicio"
+                valor={horaInicio}
+                onCambio={setHoraInicio}
+                etiqueta="Hora de inicio del bloqueo"
+              />
             </Campo>
-            <Campo etiqueta="Hora de fin" htmlFor="bloqueo-fin" requerido>
-              <Input id="bloqueo-fin" type="time" defaultValue="20:00" />
+            <Campo etiqueta="Hora de fin" htmlFor="bloqueo-fin" requerido className="w-auto">
+              <SelectorHora
+                id="bloqueo-fin"
+                valor={horaFin}
+                onCambio={setHoraFin}
+                etiqueta="Hora de fin del bloqueo"
+              />
             </Campo>
           </div>
 
@@ -306,7 +319,7 @@ export default function BloqueosPage() {
             descripcion={
               hayFiltros
                 ? 'Prueba con otra cancha u otro motivo para ver el resto de bloqueos.'
-                : 'Bloquea una franja cuando necesites reservar una pista para mantenimiento, una clase o un evento interno.'
+                : 'Bloquea una franja cuando necesites retirar una cancha del calendario por mantenimiento, una clase o un evento interno.'
             }
             accion={
               <Button onClick={() => setModalAbierto(true)}>

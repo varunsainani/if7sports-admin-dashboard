@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useSearchParams } from 'next/navigation'
 import { CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -13,6 +14,7 @@ import {
   desplazarDias,
   diaSemana,
   reservasEntre,
+  reservaPorId,
 } from '@/lib/mock-data'
 import { DIAS_SEMANA, ESTADO_RESERVA, MOTIVO_BLOQUEO, ORDEN_ESTADO_RESERVA } from '@/lib/estados'
 import { capitalizar, fechaConDia, mesAno } from '@/lib/formato'
@@ -20,6 +22,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { PageHeader } from '@/components/ui/page'
+import { ControlSegmentado } from '@/components/ui/controls'
 import { SkeletonCalendario } from '@/components/ui/skeleton'
 import {
   Select,
@@ -42,7 +45,7 @@ import { toast } from '@/components/ui/toast'
  * makes a dense grid scannable rather than merely colourful.
  */
 
-const HORAS = [9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21, 22]
+const HORAS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
 
 type Vista = 'mensual' | 'semanal'
 
@@ -292,14 +295,44 @@ function VistaSemanal({
 
 /* ------------------------------------------------------------------ page */
 
-export default function ReservasPage() {
+function CalendarioReservas() {
   const estadoVista = useEstadoVista()
+  const searchParams = useSearchParams()
   const [vista, setVista] = React.useState<Vista>('mensual')
   const [ancla, setAncla] = React.useState(HOY)
   const [canchaFiltro, setCanchaFiltro] = React.useState('todos')
   const [estadoFiltro, setEstadoFiltro] = React.useState('todos')
   const [reservaAbierta, setReservaAbierta] = React.useState<Reserva | null>(null)
   const [modalAbierto, setModalAbierto] = React.useState(false)
+
+  /**
+   * Deep links land here from global search, from the notification panel and
+   * from the dashboard's quick actions. Without this they all dropped the
+   * reader on an unfiltered August grid and the thing they clicked was not even
+   * on screen.
+   */
+  React.useEffect(() => {
+    const estado = searchParams.get('estado')
+    if (estado) setEstadoFiltro(estado)
+
+    const idReserva = searchParams.get('reserva')
+    if (idReserva) {
+      const encontrada = reservaPorId(idReserva)
+      if (encontrada) {
+        setAncla(encontrada.fecha)
+        setVista('semanal')
+        setCanchaFiltro(encontrada.canchaId)
+        setReservaAbierta(encontrada)
+        setModalAbierto(true)
+      }
+    }
+
+    if (searchParams.get('nueva')) {
+      toast.info('Nueva reserva manual', {
+        descripcion: 'Aquí se abriría el formulario de alta manual de reserva.',
+      })
+    }
+  }, [searchParams])
 
   const cargando = estadoVista === 'loading'
   const vacio = estadoVista === 'empty'
@@ -335,7 +368,18 @@ export default function ReservasPage() {
   }
 
   function mover(direccion: -1 | 1) {
-    setAncla((actual) => desplazarDias(actual, vista === 'semanal' ? direccion * 7 : direccion * 30))
+    if (vista === 'semanal') {
+      setAncla((actual) => desplazarDias(actual, direccion * 7))
+      return
+    }
+
+    // Step the month component, not 30 days. Stepping by days made "mes
+    // siguiente" land on the same month from the 1st or the 31st, and skip a
+    // month entirely across a short one.
+    setAncla((actual) => {
+      const [ano, mes] = actual.split('-').map(Number)
+      return new Date(Date.UTC(ano, mes - 1 + direccion, 1)).toISOString().slice(0, 10)
+    })
   }
 
   const hayFiltros = canchaFiltro !== 'todos' || estadoFiltro !== 'todos'
@@ -392,24 +436,15 @@ export default function ReservasPage() {
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
             {/* view toggle */}
-            <div className="flex rounded border border-borde-control p-0.5">
-              {(['mensual', 'semanal'] as Vista[]).map((opcion) => (
-                <button
-                  key={opcion}
-                  type="button"
-                  onClick={() => setVista(opcion)}
-                  aria-pressed={vista === opcion}
-                  className={cn(
-                    'rounded-sm px-2.5 py-1 text-xs transition-colors duration-rapida',
-                    vista === opcion
-                      ? 'bg-primario font-medium text-white'
-                      : 'text-tinta-media hover:text-tinta'
-                  )}
-                >
-                  {opcion === 'mensual' ? 'Mes' : 'Semana'}
-                </button>
-              ))}
-            </div>
+            <ControlSegmentado<Vista>
+              etiqueta="Vista del calendario"
+              valor={vista}
+              onCambio={setVista}
+              opciones={[
+                { valor: 'mensual', etiqueta: 'Mes' },
+                { valor: 'semanal', etiqueta: 'Semana' },
+              ]}
+            />
 
             <Select value={canchaFiltro} onValueChange={setCanchaFiltro}>
               <SelectTrigger size="sm" aria-label="Filtrar por cancha" className="w-auto min-w-44">
@@ -511,7 +546,10 @@ export default function ReservasPage() {
               {ORDEN_ESTADO_RESERVA.map((estado) => (
                 <span key={estado} className="flex items-center gap-1.5 text-2xs text-apagado">
                   <span
-                    className={cn('size-3 rounded-sm', ESTADO_RESERVA[estado].slot)}
+                    className={cn(
+                      'size-3 rounded-sm border border-borde',
+                      ESTADO_RESERVA[estado].slot
+                    )}
                     aria-hidden
                   />
                   {ESTADO_RESERVA[estado].etiqueta}
@@ -535,5 +573,17 @@ export default function ReservasPage() {
         onOpenChange={setModalAbierto}
       />
     </>
+  )
+}
+
+/**
+ * useSearchParams needs a Suspense boundary in the App Router, otherwise the
+ * whole route opts out of static rendering.
+ */
+export default function ReservasPage() {
+  return (
+    <React.Suspense fallback={<SkeletonCalendario />}>
+      <CalendarioReservas />
+    </React.Suspense>
   )
 }

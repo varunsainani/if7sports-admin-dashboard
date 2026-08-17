@@ -64,7 +64,9 @@ export default function TicketDetallePage() {
         {ticket.mensajes.map((mensaje) => (
           <li
             key={mensaje.id}
-            className={cn('flex gap-3', mensaje.esIF7 ? 'flex-row-reverse' : 'flex-row')}
+            // The polideportivo's own messages sit on the right, as in any chat;
+            // IF7SPORTS answers from the left under the platform mark.
+            className={cn('flex gap-3', mensaje.esIF7 ? 'flex-row' : 'flex-row-reverse')}
           >
             {mensaje.esIF7 ? (
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-borde bg-superficie">

@@ -1,6 +1,8 @@
 import type { EstadoPago, EstadoReserva, EventoReserva, Reserva } from '@/lib/types'
 import { canchasActivas } from './canchas'
 import { personas } from './personas'
+import { polideportivo } from './polideportivo'
+import { bloqueos } from './bloqueos'
 import {
   HOY,
   aleatorio,
@@ -34,8 +36,13 @@ import {
 const DIAS_ATRAS = 60
 const DIAS_ADELANTE = 30
 
-/** Booking hours, opening through close. */
-const HORAS = [9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21, 22]
+/**
+ * Booking hours, opening through close, with no gaps. An axis that skips an
+ * hour while drawing every column the same width lies about its own spacing,
+ * and the facility is open continuously anyway. Mid-afternoon is quiet rather
+ * than closed, which the demand curve below expresses.
+ */
+const HORAS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
 
 /**
  * Probability a given hour on a given weekday is booked. Evenings on weekdays
@@ -53,6 +60,8 @@ function demanda(hora: number, dia: number): number {
   if (hora >= 18 && hora <= 22) return 0.78
   if (hora >= 16 && hora < 18) return 0.44
   if (hora >= 12 && hora <= 13) return 0.28
+  // The quiet middle of the afternoon. Low, but not zero.
+  if (hora >= 14 && hora <= 15) return 0.1
   return 0.12
 }
 
@@ -205,12 +214,62 @@ const NOTAS_INTERNAS = [
   '',
   '',
   '',
-  'El cliente pide la pista con la iluminación ya encendida.',
+  'El cliente pide la cancha con la iluminación ya encendida.',
   'Grupo habitual de los jueves. Suelen llegar 10 minutos tarde.',
   'Solicita factura a nombre de empresa.',
   'Pago pendiente de confirmar con recepción.',
   'Aviso: el cliente ha cancelado dos veces este mes.',
 ]
+
+/** Blocked franjas indexed by court, date and hour, for O(1) lookup. */
+const FRANJAS_BLOQUEADAS = new Set<string>()
+for (const bloqueo of bloqueos) {
+  const inicio = Number(bloqueo.horaInicio.slice(0, 2))
+  const fin = Number(bloqueo.horaFin.slice(0, 2))
+  for (let hora = inicio; hora < fin; hora++) {
+    FRANJAS_BLOQUEADAS.add(`${bloqueo.canchaId}|${bloqueo.fecha}|${hora}`)
+  }
+}
+
+const FESTIVOS = new Map(polideportivo.festivos.map((f) => [f.fecha, f]))
+const HORARIO_POR_DIA = new Map(polideportivo.horarios.map((h) => [h.dia, h]))
+
+/**
+ * Whether a slot can hold a booking at all.
+ *
+ * Without this the generator sold hours the rest of the product says are
+ * closed: bookings landed on days the Configuración screen lists as "Cerrado
+ * todo el día", ran past a court's own closing time, and sat underneath blocked
+ * franjas where the calendar draws the bloqueo instead and the booking simply
+ * vanished from view while still counting in the metrics.
+ */
+function esVendible(canchaIndice: number, fecha: string, dia: number, hora: number): boolean {
+  const festivo = FESTIVOS.get(fecha)
+  if (festivo?.tipo === 'cerrado') return false
+  if (festivo?.tipo === 'horario_especial') {
+    const abre = Number(festivo.apertura?.slice(0, 2) ?? 0)
+    const cierra = Number(festivo.cierre?.slice(0, 2) ?? 24)
+    if (hora < abre || hora >= cierra) return false
+  }
+
+  const horario = HORARIO_POR_DIA.get(dia)
+  if (!horario?.abierto) return false
+  const abreCentro = Number(horario.apertura.slice(0, 2))
+  // A closing time of 00:00 means midnight at the end of the day.
+  const cierraCentro = horario.cierre === '00:00' ? 24 : Number(horario.cierre.slice(0, 2))
+  if (hora < abreCentro || hora >= cierraCentro) return false
+
+  const cancha = canchasActivas[canchaIndice]
+  if (!cancha.diasAbiertos.includes(dia)) return false
+  const abreCancha = Number(cancha.horaApertura.slice(0, 2))
+  const cierraCancha =
+    cancha.horaCierre === '00:00' ? 24 : Number(cancha.horaCierre.slice(0, 2))
+  if (hora < abreCancha || hora >= cierraCancha) return false
+
+  if (FRANJAS_BLOQUEADAS.has(`${cancha.id}|${fecha}|${hora}`)) return false
+
+  return true
+}
 
 function generarReservas(): Reserva[] {
   const reservas: Reserva[] = []
@@ -224,6 +283,8 @@ function generarReservas(): Reserva[] {
       const cancha = canchasActivas[canchaIndice]
 
       for (const hora of HORAS) {
+        if (!esVendible(canchaIndice, fecha, dia, hora)) continue
+
         const semilla = (offset + 100) * 1000 + canchaIndice * 50 + hora
 
         if (aleatorio(semilla) > demanda(hora, dia)) continue
@@ -233,8 +294,8 @@ function generarReservas(): Reserva[] {
         const persona = personas[indiceCliente(semilla * 3, offset)]
         const estado = estadoPara(offset, semilla * 7)
         const horaInicio = `${String(hora).padStart(2, '0')}:00`
-        const duracion = cancha.tipo === 'padel' || cancha.tipo === 'tenis' ? 1 : 1
-        const horaFin = sumarHoras(horaInicio, duracion)
+        // Every court sells in one-hour franjas, which is what the grid renders.
+        const horaFin = sumarHoras(horaInicio, 1)
         const origen: 'cliente' | 'manual' = aleatorio(semilla * 23) < 0.18 ? 'manual' : 'cliente'
 
         reservas.push({
@@ -284,10 +345,14 @@ export function reservasEntre(desde: string, hasta: string): Reserva[] {
   return reservas.filter((reserva) => reserva.fecha >= desde && reserva.fecha <= hasta)
 }
 
-/** The "últimas 10 reservas" list on the dashboard, newest first. */
+/**
+ * The "últimas 10 reservas" list on the dashboard: the ten most recently
+ * *created*, which is what the label means and what an owner wants to see.
+ * Sorting by slot time instead returned ten rows that all read 22:00 on the
+ * same day, which looked like a rendering fault.
+ */
 export const ultimasReservas: Reserva[] = [...reservas]
-  .sort((a, b) => `${b.fecha}${b.horaInicio}`.localeCompare(`${a.fecha}${a.horaInicio}`))
-  .filter((reserva) => reserva.fecha <= HOY)
+  .sort((a, b) => b.historial[0].fecha.localeCompare(a.historial[0].fecha))
   .slice(0, 10)
 
 export const reservasDeHoy: Reserva[] = reservasDeFecha(HOY)

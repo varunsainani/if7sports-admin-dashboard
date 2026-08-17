@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Copy, LogOut, Save, ShieldCheck, Smartphone } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -25,7 +26,7 @@ const EVENTOS_NOTIFICACION = [
   {
     id: 'reservas-nuevas',
     etiqueta: 'Reservas nuevas',
-    descripcion: 'Cada vez que un cliente reserva una pista.',
+    descripcion: 'Cada vez que un cliente reserva una cancha.',
     activo: true,
   },
   {
@@ -105,9 +106,22 @@ function CodigoQR() {
   )
 }
 
-export default function PerfilPage() {
+const SECCIONES = ['datos', 'password', '2fa', 'notificaciones'] as const
+
+function Perfil() {
   const { usuario } = useDemo()
+  const searchParams = useSearchParams()
   const [dosFactores, setDosFactores] = React.useState(true)
+
+  // The header menu links straight to a section, so the tab has to follow the
+  // URL rather than always opening on the first one.
+  const seccionUrl = searchParams.get('seccion')
+  const inicial = SECCIONES.includes(seccionUrl as (typeof SECCIONES)[number])
+    ? (seccionUrl as (typeof SECCIONES)[number])
+    : 'datos'
+  const [seccion, setSeccion] = React.useState<string>(inicial)
+
+  React.useEffect(() => setSeccion(inicial), [inicial])
 
   return (
     <>
@@ -116,7 +130,7 @@ export default function PerfilPage() {
         descripcion="Tus datos, tu contraseña y cómo quieres recibir los avisos."
       />
 
-      <Tabs defaultValue="datos">
+      <Tabs value={seccion} onValueChange={setSeccion}>
         <TabsList>
           <TabsTrigger value="datos">Datos personales</TabsTrigger>
           <TabsTrigger value="password">Contraseña</TabsTrigger>
@@ -159,7 +173,7 @@ export default function PerfilPage() {
               </div>
 
               <div className="mt-6">
-                <Button onClick={() => toast.exito('Datos guardados')}>
+                <Button onClick={() => toast.exito('Cambios guardados')}>
                   <Save aria-hidden />
                   Guardar cambios
                 </Button>
@@ -189,7 +203,7 @@ export default function PerfilPage() {
                 <Input id="password-repetir" type="password" autoComplete="new-password" />
               </Campo>
 
-              <Button onClick={() => toast.exito('Contraseña actualizada')}>
+              <Button onClick={() => toast.exito('Contraseña cambiada')}>
                 Cambiar contraseña
               </Button>
             </CardContent>
@@ -200,7 +214,7 @@ export default function PerfilPage() {
               <CardContent className="pt-5">
                 <p className="text-base text-tinta-media">
                   Si has entrado desde un ordenador que ya no usas, cierra la sesión en todos los
-                  dispositivos. Tendrás que volver a entrar en este también.
+                  dispositivos. Tendrás que volver a entrar también en este.
                 </p>
                 <Button
                   variant="peligro-suave"
@@ -234,7 +248,7 @@ export default function PerfilPage() {
                       valor ? 'Verificación en dos pasos activada' : 'Verificación en dos pasos desactivada'
                     )
                   }}
-                  aria-label="Activar la verificación en dos pasos"
+                  aria-label="Verificación en dos pasos"
                 />
                 <span className="text-sm text-tinta-media">
                   {dosFactores ? 'Activada' : 'Desactivada'}
@@ -319,7 +333,7 @@ export default function PerfilPage() {
           <Card className="max-w-2xl">
             <CardHeader>
               <div>
-                <CardTitle className="text-base">Qué quieres que te avisemos</CardTitle>
+                <CardTitle className="text-base">Avisos que quieres recibir</CardTitle>
                 <CardDescription>
                   Los avisos aparecen en la campana del panel y se envían a {usuario.correo}.
                 </CardDescription>
@@ -348,5 +362,13 @@ export default function PerfilPage() {
         </TabsContent>
       </Tabs>
     </>
+  )
+}
+
+export default function PerfilPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <Perfil />
+    </React.Suspense>
   )
 }

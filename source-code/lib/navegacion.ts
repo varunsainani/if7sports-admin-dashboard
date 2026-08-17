@@ -98,9 +98,18 @@ export const NAVEGACION: GrupoNav[] = [
 export const TODOS_LOS_ITEMS: ItemNav[] = NAVEGACION.flatMap((grupo) => grupo.items)
 
 /** Breadcrumb label for a pathname, falling back to the segment itself. */
+/** Routes with no sidebar entry of their own still need a breadcrumb label. */
+const RUTAS_SUELTAS: Record<string, string> = {
+  '/perfil': 'Mi perfil',
+  '/403': 'Sin acceso',
+}
+
 export function etiquetaDeRuta(pathname: string): string {
   const exacto = TODOS_LOS_ITEMS.find((item) => item.href === pathname)
   if (exacto) return exacto.etiqueta
+
+  const suelta = RUTAS_SUELTAS[pathname]
+  if (suelta) return suelta
 
   const porPrefijo = TODOS_LOS_ITEMS.filter(
     (item) => item.href !== '/' && pathname.startsWith(item.href)

@@ -1,11 +1,35 @@
 'use client'
 
 import * as React from 'react'
+import { usePathname } from 'next/navigation'
 
 import { cn } from '@/lib/utils'
+import { useDemo } from '@/lib/demo-context'
+import { TODOS_LOS_ITEMS, esRutaActiva } from '@/lib/navegacion'
 import { Footer } from './footer'
 import { Header } from './header'
 import { Sidebar } from './sidebar'
+import SinPermiso from '@/app/(panel)/403/page'
+
+/**
+ * Permission gate.
+ *
+ * Filtering the sidebar hides a module but does not protect it: a bookmark, the
+ * browser's back button, or a dashboard shortcut still loaded the screen in
+ * full. That made the demo's own claim false and left the 403 page unreachable.
+ */
+function Guardia({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  const { puedeVer } = useDemo()
+
+  const item = TODOS_LOS_ITEMS.find((candidato) => esRutaActiva(candidato, pathname))
+
+  // Routes with no module of their own (Mi perfil, the 403 itself) are always
+  // reachable: they belong to the person, not to a delegated module.
+  if (item && !puedeVer(item.modulo)) return <SinPermiso />
+
+  return <>{children}</>
+}
 
 /**
  * Owns the sidebar's collapsed state so the content column's left offset stays
@@ -44,7 +68,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <Header />
 
         <main className="flex-1 px-6 py-6">
-          <div className="mx-auto w-full max-w-contenido">{children}</div>
+          <div className="mx-auto w-full max-w-contenido">
+            <Guardia>{children}</Guardia>
+          </div>
         </main>
 
         <Footer />

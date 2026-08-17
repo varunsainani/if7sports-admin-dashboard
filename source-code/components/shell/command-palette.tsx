@@ -8,6 +8,7 @@ import { CalendarDays, CornerDownLeft, Search, Trophy, Users } from 'lucide-reac
 import { cn } from '@/lib/utils'
 import { canchas, clientes, reservas } from '@/lib/mock-data'
 import { TIPO_CANCHA, ESTADO_RESERVA } from '@/lib/estados'
+import { IconoCancha } from '@/components/ui/icono-cancha'
 import { euros, fechaCorta } from '@/lib/formato'
 import { TODOS_LOS_ITEMS } from '@/lib/navegacion'
 import { useDemo } from '@/lib/demo-context'
@@ -181,7 +182,7 @@ function CommandPalette({
               <div className="px-2 py-10 text-center">
                 <p className="text-base text-tinta">Sin resultados para «{consulta}»</p>
                 <p className="mt-1 text-xs text-apagado">
-                  Prueba con el id de una reserva, el nombre de un cliente o el nombre de una cancha.
+                  Prueba con la referencia de una reserva, el nombre de un cliente o el nombre de una cancha.
                 </p>
               </div>
             )}
@@ -255,9 +256,7 @@ function CommandPalette({
                 heading="Canchas"
                 className="[&_[cmdk-group-heading]]:etiqueta [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5"
               >
-                {resultados.canchas.map((cancha) => {
-                  const Icono = TIPO_CANCHA[cancha.tipo].icono
-                  return (
+                {resultados.canchas.map((cancha) => (
                     <Command.Item
                       key={cancha.id}
                       value={cancha.id}
@@ -267,7 +266,7 @@ function CommandPalette({
                         'data-[selected=true]:bg-cesped-50'
                       )}
                     >
-                      <Icono className="size-4 shrink-0 text-cal-500" aria-hidden />
+                      <IconoCancha tipo={cancha.tipo} className="size-4 shrink-0 text-cal-500" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-base text-tinta">{cancha.nombre}</p>
                         <p className="truncate text-xs text-apagado">
@@ -278,8 +277,7 @@ function CommandPalette({
                         <span className="shrink-0 text-2xs text-apagado">Desactivada</span>
                       )}
                     </Command.Item>
-                  )
-                })}
+                ))}
               </Command.Group>
             )}
           </Command.List>
@@ -291,7 +289,7 @@ function CommandPalette({
             </span>
             <span className="flex items-center gap-1.5">
               <Trophy className="size-3" aria-hidden />
-              Busca por id, cliente o cancha
+              Busca por referencia, cliente o cancha
             </span>
           </div>
         </Command>

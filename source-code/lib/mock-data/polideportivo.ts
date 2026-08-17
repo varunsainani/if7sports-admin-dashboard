@@ -47,7 +47,7 @@ export const polideportivo: Polideportivo = {
     {
       id: 'fes-5',
       fecha: '2026-05-01',
-      nombre: 'Día del Trabajador',
+      nombre: 'Fiesta del Trabajo',
       tipo: 'horario_especial',
       apertura: '10:00',
       cierre: '15:00',

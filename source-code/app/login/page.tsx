@@ -82,7 +82,7 @@ function PanelIzquierdo() {
 
         <div>
           <p className="max-w-sm font-display text-2xl font-semibold leading-tight tracking-display text-white">
-            Tus pistas, tus reservas y tus cuentas en una sola pantalla.
+            Tus canchas, tus reservas y tus cuentas en una sola pantalla.
           </p>
           <p className="mt-3 max-w-sm text-sm text-cesped-100">
             Gestiona canchas, horarios, precios y clientes del {polideportivo.nombre}.
@@ -244,7 +244,7 @@ export default function LoginPage() {
                 Crea tu contraseña
               </h1>
               <p className="mt-1.5 text-base text-apagado">
-                Entraste con la contraseña temporal que te enviamos por correo. Elige una propia
+                Has entrado con la contraseña temporal que te enviamos por correo. Elige una propia
                 para continuar.
               </p>
 

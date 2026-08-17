@@ -44,7 +44,19 @@ export default function ClientesPage() {
   const datos = React.useMemo(() => {
     if (estadoVista === 'empty') return []
 
+    const termino = busqueda.trim().toLowerCase()
+    const soloDigitos = termino.replace(/\D/g, '')
+
     return clientes.filter((cliente) => {
+      if (termino) {
+        const coincide =
+          cliente.nombre.toLowerCase().includes(termino) ||
+          cliente.correo.toLowerCase().includes(termino) ||
+          cliente.telefono.toLowerCase().includes(termino) ||
+          (soloDigitos.length > 2 && cliente.telefono.replace(/\D/g, '').includes(soloDigitos))
+        if (!coincide) return false
+      }
+
       if (estadoReserva === 'todos' && cancha === 'todos') return true
 
       // Filtering clients by properties of their bookings, which is what the
@@ -56,7 +68,7 @@ export default function ClientesPage() {
         return true
       })
     })
-  }, [estadoReserva, cancha, estadoVista])
+  }, [busqueda, estadoReserva, cancha, estadoVista])
 
   const columns = React.useMemo<ColumnDef<Cliente, unknown>[]>(
     () => [
@@ -74,7 +86,7 @@ export default function ClientesPage() {
         accessorKey: 'telefono',
         header: 'Teléfono',
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-tinta-media numeros-tabulares">
+          <span className="whitespace-nowrap font-mono text-xs text-tinta-media numeros-tabulares">
             {row.original.telefono}
           </span>
         ),
@@ -100,11 +112,13 @@ export default function ClientesPage() {
       {
         accessorKey: 'totalReservas',
         header: 'Reservas',
+        meta: { numerica: true },
         cell: ({ row }) => <CeldaNumerica>{row.original.totalReservas}</CeldaNumerica>,
       },
       {
         accessorKey: 'importeTotalPagado',
         header: 'Importe pagado',
+        meta: { numerica: true },
         cell: ({ row }) => <CeldaNumerica>{euros(row.original.importeTotalPagado)}</CeldaNumerica>,
       },
       {
@@ -171,7 +185,6 @@ export default function ClientesPage() {
         columns={columns}
         data={datos}
         estado={estadoVista}
-        busqueda={busqueda}
         porPagina={12}
         onFilaClick={(cliente) => router.push(`/clientes/${cliente.id}`)}
         toolbar={
@@ -218,7 +231,7 @@ export default function ClientesPage() {
             descripcion={
               hayFiltros
                 ? 'Prueba con otro nombre, correo o teléfono, o quita los filtros.'
-                : 'En cuanto alguien reserve una pista aparecerá aquí con su historial completo.'
+                : 'En cuanto alguien reserve una cancha aparecerá aquí con su historial completo.'
             }
             accionSecundaria={
               hayFiltros ? (

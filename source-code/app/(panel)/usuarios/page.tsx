@@ -48,13 +48,13 @@ import { toast } from '@/components/ui/toast'
 /** What granting each module actually means, in the owner's terms. */
 const ALCANCE_MODULO: Record<Modulo, string> = {
   reservas: 'Ver el calendario, crear reservas manuales y cambiar su estado.',
-  canchas: 'Crear y editar pistas, precios y horarios.',
+  canchas: 'Crear y editar canchas, precios y horarios.',
   clientes: 'Consultar la ficha y el historial de cualquier cliente.',
   configuracion: 'Cambiar los datos, horarios y festivos del polideportivo.',
   metricas: 'Ver facturación, ocupación y el resto de indicadores.',
   bloqueos: 'Bloquear y liberar franjas horarias.',
   instructores: 'Dar de alta y editar fichas de instructores.',
-  soporte: 'Abrir tickets con IF7SPORTS y leer las respuestas.',
+  soporte: 'Abrir solicitudes con IF7SPORTS y leer las respuestas.',
 }
 
 function MatrizPermisos({
@@ -202,7 +202,7 @@ function ModalUsuario({
           <Button
             onClick={() => {
               onOpenChange(false)
-              toast.exito(editando ? 'Permisos guardados' : 'Usuario creado', {
+              toast.exito(editando ? 'Cambios guardados' : 'Usuario creado', {
                 descripcion: editando
                   ? undefined
                   : 'Se ha enviado una contraseña temporal al correo indicado.',
@@ -312,19 +312,19 @@ export default function UsuariosPage() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() =>
-                    toast.exito('Contraseña temporal enviada', {
+                    toast.exito('Contraseña restablecida', {
                       descripcion: `${row.original.correo} deberá cambiarla al entrar.`,
                     })
                   }
                 >
                   <KeyRound aria-hidden />
-                  Resetear contraseña
+                  Restablecer contraseña
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   peligro
                   onSelect={() =>
-                    toast.deshacer('Usuario desactivado', () => toast.info('Usuario reactivado'), row.original.nombre)
+                    toast.deshacer('Usuario desactivado', () => toast.info('Usuario restaurado'), row.original.nombre)
                   }
                 >
                   <UserX aria-hidden />

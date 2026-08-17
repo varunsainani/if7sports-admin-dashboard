@@ -10,6 +10,7 @@ import type { Cancha } from '@/lib/types'
 import { useEstadoVista } from '@/lib/demo-context'
 import { canchas } from '@/lib/mock-data'
 import { ORDEN_TIPO_CANCHA, TIPO_CANCHA } from '@/lib/estados'
+import { IconoCancha } from '@/components/ui/icono-cancha'
 import { euros } from '@/lib/formato'
 import { Button } from '@/components/ui/button'
 import { BadgeEstadoCancha } from '@/components/ui/badge'
@@ -37,12 +38,15 @@ export default function CanchasPage() {
 
   const datos = React.useMemo(() => {
     if (estadoVista === 'empty') return []
+    const termino = busqueda.trim().toLowerCase()
+
     return canchas.filter((cancha) => {
+      if (termino && !cancha.nombre.toLowerCase().includes(termino)) return false
       if (tipo !== 'todos' && cancha.tipo !== tipo) return false
       if (estado !== 'todos' && cancha.estado !== estado) return false
       return true
     })
-  }, [tipo, estado, estadoVista])
+  }, [busqueda, tipo, estado, estadoVista])
 
   const columns = React.useMemo<ColumnDef<Cancha, unknown>[]>(
     () => [
@@ -50,11 +54,10 @@ export default function CanchasPage() {
         accessorKey: 'nombre',
         header: 'Nombre',
         cell: ({ row }) => {
-          const Icono = TIPO_CANCHA[row.original.tipo].icono
           return (
             <div className="flex items-center gap-2.5">
               <span className="flex size-8 shrink-0 items-center justify-center rounded bg-cesped-50">
-                <Icono className="size-4 text-cesped-600" aria-hidden />
+                <IconoCancha tipo={row.original.tipo} className="size-4 text-cesped-600" />
               </span>
               <CeldaPrincipal secundario={row.original.descripcion}>
                 {row.original.nombre}
@@ -73,11 +76,12 @@ export default function CanchasPage() {
       {
         accessorKey: 'precioBase',
         header: 'Precio base',
+        meta: { numerica: true },
         cell: ({ row }) => (
           <div>
             <CeldaNumerica>{euros(row.original.precioBase)}</CeldaNumerica>
             {row.original.reglasPrecio.length > 0 && (
-              <p className="text-2xs text-apagado">
+              <p className="text-right text-2xs text-apagado">
                 {row.original.reglasPrecio.length}{' '}
                 {row.original.reglasPrecio.length === 1 ? 'regla' : 'reglas'} de precio
               </p>
@@ -125,7 +129,7 @@ export default function CanchasPage() {
                   onSelect={() =>
                     toast.deshacer(
                       row.original.estado === 'activa' ? 'Cancha desactivada' : 'Cancha activada',
-                      () => toast.info('Cambio deshecho'),
+                      () => toast.info('Cancha restaurada'),
                       row.original.nombre
                     )
                   }
@@ -148,7 +152,7 @@ export default function CanchasPage() {
     <>
       <PageHeader
         titulo="Canchas"
-        descripcion="Pistas y campos del polideportivo, con su precio base y su disponibilidad."
+        descripcion="Canchas y campos del polideportivo, con su precio base y su disponibilidad."
         acciones={
           <Button
             onClick={() =>
@@ -168,7 +172,6 @@ export default function CanchasPage() {
         columns={columns}
         data={datos}
         estado={estadoVista}
-        busqueda={busqueda}
         onFilaClick={(cancha) => router.push(`/canchas/${cancha.id}`)}
         toolbar={
           <>
@@ -216,8 +219,8 @@ export default function CanchasPage() {
             }
             descripcion={
               hayFiltros
-                ? 'Prueba con otro nombre o quita los filtros para ver todas las pistas.'
-                : 'Da de alta la primera pista para poder empezar a recibir reservas.'
+                ? 'Prueba con otro nombre o quita los filtros para ver todas las canchas.'
+                : 'Da de alta tu primera cancha para empezar a recibir reservas.'
             }
             accion={
               <Button

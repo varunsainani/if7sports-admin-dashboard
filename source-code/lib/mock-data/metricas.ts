@@ -17,8 +17,13 @@ import { HOY, desplazarDias } from './base'
 /** IF7SPORTS commission on gross billings. Drives "Total ganado". */
 export const COMISION_IF7 = 0.08
 
-/** Bookable hours per court per day, used as the occupancy denominator. */
-const HORAS_OPERATIVAS = 12
+/**
+ * Bookable hours per court per day, the occupancy denominator. Must stay in
+ * step with the HORAS array in reservas.ts, or occupancy silently misreports.
+ */
+const HORAS_OPERATIVAS = 14
+const PRIMERA_HORA = 9
+const ULTIMA_HORA = 22
 
 export type Granularidad = 'dia' | 'semana' | 'mes'
 
@@ -28,12 +33,35 @@ export interface RangoFechas {
   etiqueta: string
 }
 
-/** The presets behind the global date filter at the top of Métricas. */
+/** Monday of the week containing HOY. */
+const LUNES_DE_ESTA_SEMANA = (() => {
+  const [ano, mes, dia] = HOY.split('-').map(Number)
+  const jsDia = new Date(Date.UTC(ano, mes - 1, dia)).getUTCDay()
+  return desplazarDias(HOY, -((jsDia === 0 ? 7 : jsDia) - 1))
+})()
+
+const PRIMERO_DE_MES = `${HOY.slice(0, 7)}-01`
+const ULTIMO_DE_MES = (() => {
+  const [ano, mes] = HOY.split('-').map(Number)
+  return new Date(Date.UTC(ano, mes, 0)).toISOString().slice(0, 10)
+})()
+
+/**
+ * The presets behind the global date filter.
+ *
+ * Calendar-relative, not trailing. "Mes" means this month, which is what an
+ * operator means when they ask for it, and it spans both the days already played
+ * and the days still on the book. Trailing windows that all end today contain
+ * only resolved bookings, which collapses the status breakdown into a single
+ * slice and makes the chart say nothing.
+ */
 export const RANGOS: Record<string, RangoFechas> = {
   dia: { desde: HOY, hasta: HOY, etiqueta: 'Hoy' },
-  semana: { desde: desplazarDias(HOY, -6), hasta: HOY, etiqueta: 'Últimos 7 días' },
-  mes: { desde: desplazarDias(HOY, -29), hasta: HOY, etiqueta: 'Últimos 30 días' },
-  ano: { desde: desplazarDias(HOY, -59), hasta: HOY, etiqueta: 'Todo el histórico' },
+  semana: { desde: LUNES_DE_ESTA_SEMANA, hasta: desplazarDias(LUNES_DE_ESTA_SEMANA, 6), etiqueta: 'Esta semana' },
+  mes: { desde: PRIMERO_DE_MES, hasta: ULTIMO_DE_MES, etiqueta: 'Este mes' },
+  // The dataset spans 60 days back to 30 forward, so this is genuinely all of
+  // it. Labelled for what it covers rather than promising a calendar year.
+  ano: { desde: desplazarDias(HOY, -60), hasta: desplazarDias(HOY, 30), etiqueta: 'Todo' },
 }
 
 /** Billings only count bookings that were honoured or are still live. */
@@ -41,7 +69,8 @@ function facturable(reserva: Reserva): boolean {
   return reserva.estado === 'completada' || reserva.estado === 'confirmada'
 }
 
-function agruparPorFecha(lista: Reserva[], desde: string, hasta: string) {
+/** A zero-filled bucket per day in the range, so gaps plot as 0 rather than break the line. */
+function agruparPorFecha(desde: string, hasta: string) {
   const mapa = new Map<string, number>()
 
   for (let fecha = desde; fecha <= hasta; fecha = desplazarDias(fecha, 1)) {
@@ -91,9 +120,16 @@ export function calcularMetricas(desde: string, hasta: string): Metricas {
       (r) => r.canchaId === cancha.id && r.estado !== 'cancelada'
     ).length
 
+    // Only the part of a bloqueo that overlaps the bookable window counts. A
+    // closure from 08:00 to 11:00 removes two sellable hours, not three, and
+    // counting the raw span pushed occupancy above what was ever on sale.
     const bloqueadas = bloqueosRango
       .filter((b) => b.canchaId === cancha.id)
-      .reduce((suma, b) => suma + (Number(b.horaFin.slice(0, 2)) - Number(b.horaInicio.slice(0, 2))), 0)
+      .reduce((suma, b) => {
+        const inicio = Math.max(Number(b.horaInicio.slice(0, 2)), PRIMERA_HORA)
+        const fin = Math.min(Number(b.horaFin.slice(0, 2)), ULTIMA_HORA + 1)
+        return suma + Math.max(0, fin - inicio)
+      }, 0)
 
     return {
       canchaId: cancha.id,
@@ -158,9 +194,9 @@ export function calcularMetricas(desde: string, hasta: string): Metricas {
 
   /* ------------------------------------------------------- time series */
 
-  const ingresos = agruparPorFecha(enRango, desde, hasta)
-  const cancelaciones = agruparPorFecha(enRango, desde, hasta)
-  const devoluciones = agruparPorFecha(enRango, desde, hasta)
+  const ingresos = agruparPorFecha(desde, hasta)
+  const cancelaciones = agruparPorFecha(desde, hasta)
+  const devoluciones = agruparPorFecha(desde, hasta)
 
   for (const r of enRango) {
     if (facturable(r)) ingresos.set(r.fecha, (ingresos.get(r.fecha) ?? 0) + r.importe)
@@ -201,8 +237,17 @@ function facturacionDe(desde: string, hasta: string): number {
     .reduce((suma, r) => suma + r.importe, 0)
 }
 
-const facturacionMesActual = facturacionDe(desplazarDias(HOY, -29), HOY)
-const facturacionMesAnterior = facturacionDe(desplazarDias(HOY, -59), desplazarDias(HOY, -30))
+/** Same window Métricas uses for "Este mes", so the two screens agree. */
+const facturacionMesActual = facturacionDe(PRIMERO_DE_MES, ULTIMO_DE_MES)
+
+const MES_ANTERIOR = (() => {
+  const [ano, mes] = HOY.split('-').map(Number)
+  const primero = new Date(Date.UTC(ano, mes - 2, 1)).toISOString().slice(0, 10)
+  const ultimo = new Date(Date.UTC(ano, mes - 1, 0)).toISOString().slice(0, 10)
+  return { primero, ultimo }
+})()
+
+const facturacionMesAnterior = facturacionDe(MES_ANTERIOR.primero, MES_ANTERIOR.ultimo)
 
 export const resumenDashboard = {
   facturacionMes: facturacionMesActual,
@@ -217,7 +262,7 @@ export const resumenDashboard = {
 
   clientesActivos: new Set(
     reservas
-      .filter((r) => r.fecha >= desplazarDias(HOY, -29) && r.fecha <= HOY && r.estado !== 'cancelada')
+      .filter((r) => r.fecha >= PRIMERO_DE_MES && r.fecha <= ULTIMO_DE_MES && r.estado !== 'cancelada')
       .map((r) => r.clienteId)
   ).size,
 }

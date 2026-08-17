@@ -165,7 +165,7 @@ export default function SoportePage() {
         header: 'Asunto',
         cell: ({ row }) => (
           <CeldaPrincipal
-            secundario={`${row.original.mensajes.length} mensajes en el hilo`}
+            secundario={`${row.original.mensajes.length} ${row.original.mensajes.length === 1 ? 'mensaje' : 'mensajes'} en el hilo`}
           >
             {row.original.asunto}
           </CeldaPrincipal>
@@ -201,7 +201,7 @@ export default function SoportePage() {
       />
 
       <DataTable
-        descripcion="Tickets de soporte con IF7SPORTS"
+        descripcion="Solicitudes de soporte con IF7SPORTS"
         columns={columns}
         data={datos}
         estado={estadoVista}

@@ -13,8 +13,9 @@ import {
 
 import { cn } from '@/lib/utils'
 import type { EstadoReserva, Reserva } from '@/lib/types'
-import { ESTADO_RESERVA, TIPO_CANCHA } from '@/lib/estados'
-import { canchaPorId } from '@/lib/mock-data'
+import { ESTADO_RESERVA } from '@/lib/estados'
+import { IconoCancha } from '@/components/ui/icono-cancha'
+import { canchaPorId, clientePorId } from '@/lib/mock-data'
 import { euros, fechaConDia, fechaHora, capitalizar } from '@/lib/formato'
 import { Button } from '@/components/ui/button'
 import { BadgePago, BadgeReserva } from '@/components/ui/badge'
@@ -113,7 +114,8 @@ export function BookingDetailModal({ reserva, abierto, onOpenChange }: BookingDe
   if (!reserva) return null
 
   const cancha = canchaPorId(reserva.canchaId)
-  const TipoIcono = cancha ? TIPO_CANCHA[cancha.tipo].icono : null
+  const cliente = clientePorId(reserva.clienteId)
+
 
   function cambiarEstado(nuevo: EstadoReserva) {
     toast.exito(`Reserva marcada como ${ESTADO_RESERVA[nuevo].etiqueta.toLowerCase()}`, {
@@ -166,7 +168,7 @@ export function BookingDetailModal({ reserva, abierto, onOpenChange }: BookingDe
             </Dato>
             <Dato etiqueta="Cancha">
               <span className="flex items-center gap-1.5">
-                {TipoIcono && <TipoIcono className="size-3.5 text-cal-500" aria-hidden />}
+                {cancha && <IconoCancha tipo={cancha.tipo} className="size-4 text-cal-500" />}
                 {reserva.canchaNombre}
               </span>
             </Dato>
@@ -200,16 +202,25 @@ export function BookingDetailModal({ reserva, abierto, onOpenChange }: BookingDe
         </DialogBody>
 
         <DialogFooter>
+          {/* Reserva carries no phone or email, so both come from the client
+              record. Building the WhatsApp URL from the display name produced a
+              link that could be copied but never worked. */}
           <Button variant="fantasma" size="sm" asChild>
-            <a href={`https://wa.me/${reserva.clienteNombre}`} onClick={(e) => e.preventDefault()}>
+            <a
+              href={`https://wa.me/${(cliente?.telefono ?? '').replace(/[^0-9]/g, '')}`}
+              target="_blank"
+              rel="noreferrer"
+            >
               <MessageCircle aria-hidden />
               WhatsApp
             </a>
           </Button>
 
-          <Button variant="fantasma" size="sm">
-            <Mail aria-hidden />
-            Enviar correo
+          <Button variant="fantasma" size="sm" asChild>
+            <a href={`mailto:${cliente?.correo ?? ''}`}>
+              <Mail aria-hidden />
+              Enviar correo
+            </a>
           </Button>
 
           <div className="ml-auto flex flex-wrap items-center gap-2.5">

@@ -35,7 +35,7 @@ export const instructores: Instructor[] = [
     nombre: 'Marta Piqueras',
     tipo: 'teacher',
     foto: '/imagenes/instructores/marta.jpg',
-    notasInternas: 'Clases de tenis para adultos. Solicita siempre la pista 1 por la iluminación.',
+    notasInternas: 'Clases de tenis para adultos. Solicita siempre la cancha Tenis 1 por la iluminación.',
   },
   {
     id: 'ins-5',

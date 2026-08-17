@@ -2,9 +2,9 @@ import type { Cancha } from '@/lib/types'
 
 /**
  * Eight courts across five types. Prices follow what a Valencian municipal
- * facility actually charges: pádel and tenis by the hour and a half, fútbol by
- * the hour, with evening and weekend rules pushing the price up because that is
- * when demand sits.
+ * facility actually charges, with evening and weekend rules pushing the price
+ * up because that is when demand sits. Every court sells in one-hour franjas,
+ * which is what the calendar grid renders.
  *
  * One court is deactivated on purpose, so the estado filter on the courts list
  * has something real to filter.

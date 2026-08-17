@@ -113,11 +113,19 @@ function BadgeTicket({ estado, className }: { estado: EstadoTicket; className?: 
 
 /* --------------------------------------------------------------- court state */
 
+/**
+ * Court availability, not booking status, so it stays off the status hues. The
+ * filled dot carries "activa" and the hollow one "desactivada"; spending a hue
+ * here would put it in competition with the booking badge on the same row.
+ */
 function BadgeEstadoCancha({ activa, className }: { activa: boolean; className?: string }) {
   return (
-    <Badge tono={activa ? 'exito' : 'contorno'} className={className}>
+    <Badge tono={activa ? 'neutro' : 'contorno'} className={className}>
       <span
-        className={cn('size-1.5 rounded-full', activa ? 'bg-confirmada-solido' : 'bg-cal-500')}
+        className={cn(
+          'size-1.5 rounded-full',
+          activa ? 'bg-cal-800' : 'border border-cal-500 bg-transparent'
+        )}
         aria-hidden
       />
       {activa ? 'Activa' : 'Desactivada'}

@@ -251,20 +251,25 @@ export const TIPO_TICKET: Record<TipoTicket, string> = {
   comercial: 'Comercial',
 }
 
+/**
+ * The entity is called "solicitud" throughout the interface, which is feminine,
+ * so the state labels agree with it. The keys keep the brief's masculine words
+ * (abierto / en_curso / cerrado) so the mapping back to the spec is traceable.
+ */
 export const ESTADO_TICKET: Record<EstadoTicket, { etiqueta: string; clases: string; icono: LucideIcon }> = {
   abierto: {
-    etiqueta: 'Abierto',
-    clases: 'bg-pendiente-bg text-pendiente-texto border border-dashed border-pendiente-borde',
+    etiqueta: 'Abierta',
+    clases: 'bg-pago-pendiente-bg text-pago-pendiente-texto border border-pago-pendiente-borde',
     icono: Clock,
   },
   en_curso: {
     etiqueta: 'En curso',
-    clases: 'bg-completada-bg text-completada-texto border border-completada-borde',
+    clases: 'bg-pago-bg text-pago-texto border border-pago-borde',
     icono: MoreHorizontal,
   },
   cerrado: {
-    etiqueta: 'Cerrado',
-    clases: 'bg-confirmada-bg text-confirmada-texto border border-confirmada-borde',
+    etiqueta: 'Cerrada',
+    clases: 'text-pago-na-texto border border-dashed border-pago-na-borde',
     icono: Check,
   },
 }

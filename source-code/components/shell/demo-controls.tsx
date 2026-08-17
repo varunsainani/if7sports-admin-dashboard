@@ -155,7 +155,7 @@ export function DemoControls() {
           <p className="mt-1.5 text-2xs text-apagado">
             {modulosVisibles.length === 8
               ? 'Permisos totales, la barra lateral muestra todo.'
-              : `${8 - modulosVisibles.length} módulos ocultos en la barra lateral.`}
+              : `${8 - modulosVisibles.length} ${8 - modulosVisibles.length === 1 ? 'módulo oculto' : 'módulos ocultos'} en la barra lateral.`}
           </p>
         </div>
       </div>

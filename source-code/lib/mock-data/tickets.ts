@@ -35,7 +35,7 @@ export const tickets: Ticket[] = [
         esIF7: true,
         fecha: `${desplazarDias(HOY, -4)}T10:02:00`,
         cuerpo:
-          'Gracias María. Lo hemos localizado: la transferencia se rechazó por un dígito incorrecto en el IBAN registrado. Confírmanos el número completo y la reemitimos.',
+          'Gracias, María. Lo hemos localizado: la transferencia se rechazó por un dígito incorrecto en el IBAN registrado. Confírmanos el número completo y la reemitimos.',
         adjuntos: [],
       },
       {
@@ -52,7 +52,7 @@ export const tickets: Ticket[] = [
         esIF7: true,
         fecha: `${desplazarDias(HOY, -1)}T12:30:00`,
         cuerpo:
-          'Perfecto. Hemos reemitido la transferencia con el IBAN nuevo, debería estar disponible en 48 horas hábiles. Dejamos el ticket abierto hasta que lo confirmes.',
+          'Perfecto. Hemos reemitido la transferencia con el IBAN nuevo, debería estar disponible en un plazo de 48 horas. Dejamos la solicitud abierta hasta que lo confirmes.',
         adjuntos: [],
       },
     ],
@@ -82,7 +82,7 @@ export const tickets: Ticket[] = [
         esIF7: true,
         fecha: `${desplazarDias(HOY, -17)}T09:40:00`,
         cuerpo:
-          'Reproducido. El fallo se daba cuando la hora de fin coincidía exactamente con el cierre de la pista. Lo corregimos en el despliegue de esta noche.',
+          'Reproducido. El fallo se daba cuando la hora de fin coincidía exactamente con el cierre de la cancha. Lo corregimos en el despliegue de esta noche.',
         adjuntos: [],
       },
       {

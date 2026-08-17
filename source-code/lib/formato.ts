@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow, parseISO } from 'date-fns'
+import { format, formatDistanceStrict, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 /**
@@ -49,6 +49,12 @@ function aFecha(valor: string | Date): Date {
   return typeof valor === 'string' ? parseISO(valor) : valor
 }
 
+/**
+ * The dataset's "now". Kept in step with HOY in lib/mock-data/base.ts; it is
+ * duplicated rather than imported so this module stays free of data deps.
+ */
+const AHORA = '2026-08-17T18:00:00'
+
 /** 14/03/2026 */
 export function fechaCorta(valor: string | Date): string {
   return format(aFecha(valor), 'dd/MM/yyyy', { locale: es })
@@ -74,14 +80,27 @@ export function hora(valor: string | Date): string {
   return format(aFecha(valor), 'HH:mm', { locale: es })
 }
 
-/** marzo 2026 */
+/** marzo de 2026 */
 export function mesAno(valor: string | Date): string {
-  return format(aFecha(valor), 'MMMM yyyy', { locale: es })
+  return format(aFecha(valor), "MMMM 'de' yyyy", { locale: es })
 }
 
-/** hace 3 horas */
-export function haceTiempo(valor: string | Date): string {
-  return formatDistanceToNow(aFecha(valor), { locale: es, addSuffix: true })
+/**
+ * hace 3 horas
+ *
+ * Measured against the dataset's own clock, not the real one. Everything else
+ * here is anchored to HOY, so using the wall clock made a timestamp dated later
+ * today read "en alrededor de 4 horas", and made the label differ between the
+ * server render and the client render.
+ *
+ * Strict, because the loose variant renders "hace alrededor de 1 mes", which is
+ * date-fns translating "about" literally and reads as machine translation.
+ */
+export function haceTiempo(valor: string | Date, referencia: string | Date = AHORA): string {
+  return formatDistanceStrict(aFecha(valor), aFecha(referencia), {
+    locale: es,
+    addSuffix: true,
+  })
 }
 
 /** 18:00 - 19:30 */

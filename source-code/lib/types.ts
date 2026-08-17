@@ -81,7 +81,10 @@ export interface Cliente {
   correo: string
   telefono: string
   fechaPrimeraReserva: string
+  /** The most recent booking that has already happened. */
   fechaUltimaReserva: string
+  /** The next booking still on the book, if there is one. */
+  proximaReserva?: string
   totalReservas: number
   importeTotalPagado: number
   reservasActivas: number

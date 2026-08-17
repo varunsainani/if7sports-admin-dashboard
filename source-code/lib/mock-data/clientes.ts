@@ -1,6 +1,7 @@
 import type { Cliente } from '@/lib/types'
 import { personas, fechaAlta } from './personas'
 import { reservas } from './reservas'
+import { HOY } from './base'
 
 /**
  * Clients, with every counter derived from the actual booking records rather
@@ -18,6 +19,12 @@ function construirClientes(): Cliente[] {
       const suyas = reservas.filter((reserva) => reserva.clienteId === persona.id)
       const fechas = suyas.map((reserva) => reserva.fecha).sort()
 
+      // "Última reserva" means the most recent one that has happened. The
+      // dataset runs 30 days into the future, so taking the plain maximum
+      // reported a date a month ahead in a column labelled "last".
+      const pasadas = fechas.filter((fecha) => fecha <= HOY)
+      const proximas = fechas.filter((fecha) => fecha > HOY)
+
       const pagadas = suyas.filter((reserva) => reserva.estadoPago === 'pagado')
 
       return {
@@ -27,7 +34,8 @@ function construirClientes(): Cliente[] {
         telefono: persona.telefono,
         // Falls back to the signup date for someone who has not booked yet.
         fechaPrimeraReserva: fechas[0] ?? fechaAlta(persona),
-        fechaUltimaReserva: fechas[fechas.length - 1] ?? fechaAlta(persona),
+        fechaUltimaReserva: pasadas[pasadas.length - 1] ?? fechas[0] ?? fechaAlta(persona),
+        proximaReserva: proximas[0],
         totalReservas: suyas.length,
         importeTotalPagado: pagadas.reduce((suma, reserva) => suma + reserva.importe, 0),
         reservasActivas: suyas.filter(

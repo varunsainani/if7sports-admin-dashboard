@@ -9,11 +9,13 @@ import { cn } from '@/lib/utils'
 import { useEstadoVista } from '@/lib/demo-context'
 import { bloqueos, canchaPorId, polideportivo } from '@/lib/mock-data'
 import { DIAS_SEMANA, MOTIVO_BLOQUEO, ORDEN_TIPO_CANCHA, TIPO_CANCHA } from '@/lib/estados'
+import { IconoCancha } from '@/components/ui/icono-cancha'
 import { euros, fechaCorta } from '@/lib/formato'
 import { Button } from '@/components/ui/button'
 import { BadgeEstadoCancha } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/controls'
 import { Campo, Input, Textarea } from '@/components/ui/input'
+import { SelectorHora } from '@/components/ui/selector-hora'
 import { EmptyState } from '@/components/ui/empty-state'
 import { PageHeader, PageHeaderSkeleton, Section } from '@/components/ui/page'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -36,8 +38,10 @@ export default function CanchaDetallePage() {
   if (!cancha) notFound()
 
   const cierres = bloqueos.filter((b) => b.canchaId === cancha.id).slice(0, 8)
-  const Icono = TIPO_CANCHA[cancha.tipo].icono
+  const [apertura, setApertura] = React.useState(cancha.horaApertura)
+  const [cierre, setCierre] = React.useState(cancha.horaCierre)
   const cargando = estadoVista === 'loading'
+  const vacio = estadoVista === 'empty'
 
   if (cargando) {
     return (
@@ -82,13 +86,13 @@ export default function CanchaDetallePage() {
           <TabsTrigger value="horarios">Horarios</TabsTrigger>
           <TabsTrigger value="precios">
             Precios
-            {cancha.reglasPrecio.length > 0 && (
+            {!vacio && cancha.reglasPrecio.length > 0 && (
               <TabsCount>{cancha.reglasPrecio.length}</TabsCount>
             )}
           </TabsTrigger>
           <TabsTrigger value="cierres">
             Cierres puntuales
-            {cierres.length > 0 && <TabsCount>{cierres.length}</TabsCount>}
+            {!vacio && cierres.length > 0 && <TabsCount>{cierres.length}</TabsCount>}
           </TabsTrigger>
         </TabsList>
 
@@ -118,7 +122,7 @@ export default function CanchaDetallePage() {
               <Campo
                 etiqueta="Descripción"
                 htmlFor="cancha-descripcion"
-                ayuda="La ven los clientes al elegir pista."
+                ayuda="La ven los clientes al elegir cancha."
               >
                 <Textarea id="cancha-descripcion" rows={3} defaultValue={cancha.descripcion} />
               </Campo>
@@ -133,7 +137,7 @@ export default function CanchaDetallePage() {
                     className="flex items-center gap-3 rounded-lg border border-borde bg-superficie px-3 py-2"
                   >
                     <span className="flex size-10 shrink-0 items-center justify-center rounded bg-cesped-50">
-                      <Icono className="size-4 text-cesped-600" aria-hidden />
+                      <IconoCancha tipo={cancha.tipo} className="size-4 text-cesped-600" />
                     </span>
                     <span className="min-w-0 flex-1 truncate text-xs text-tinta-media">
                       {imagen.split('/').pop()}
@@ -165,7 +169,7 @@ export default function CanchaDetallePage() {
         <TabsContent value="horarios">
           <Section
             titulo="Días abiertos"
-            descripcion="Marca los días en los que esta pista admite reservas."
+            descripcion="Marca los días en los que esta cancha admite reservas."
           >
             <div className="flex flex-wrap gap-2">
               {DIAS_SEMANA.map((dia) => {
@@ -189,13 +193,23 @@ export default function CanchaDetallePage() {
             </div>
           </Section>
 
-          <Section titulo="Horario de la pista">
-            <div className="grid max-w-md gap-4 sm:grid-cols-2">
-              <Campo etiqueta="Hora de apertura" htmlFor="cancha-apertura">
-                <Input id="cancha-apertura" type="time" defaultValue={cancha.horaApertura} />
+          <Section titulo="Horario de la cancha">
+            <div className="flex flex-wrap items-end gap-4">
+              <Campo etiqueta="Hora de apertura" htmlFor="cancha-apertura" className="w-auto">
+                <SelectorHora
+                  id="cancha-apertura"
+                  valor={apertura}
+                  onCambio={setApertura}
+                  etiqueta="Hora de apertura de la cancha"
+                />
               </Campo>
-              <Campo etiqueta="Hora de cierre" htmlFor="cancha-cierre">
-                <Input id="cancha-cierre" type="time" defaultValue={cancha.horaCierre} />
+              <Campo etiqueta="Hora de cierre" htmlFor="cancha-cierre" className="w-auto">
+                <SelectorHora
+                  id="cancha-cierre"
+                  valor={cierre}
+                  onCambio={setCierre}
+                  etiqueta="Hora de cierre de la cancha"
+                />
               </Campo>
             </div>
 
@@ -210,7 +224,7 @@ export default function CanchaDetallePage() {
                   <>
                     Sigue el horario general del polideportivo, de{' '}
                     {polideportivo.horarios[0].apertura} a {polideportivo.horarios[0].cierre} entre
-                    semana. Cambiar estas horas crea una excepción solo para esta pista.
+                    semana. Cambiar estas horas crea una excepción solo para esta cancha.
                   </>
                 )}
               </p>
@@ -251,13 +265,13 @@ export default function CanchaDetallePage() {
               </Button>
             }
           >
-            {cancha.reglasPrecio.length === 0 ? (
+            {vacio || cancha.reglasPrecio.length === 0 ? (
               <div className="rounded-lg border border-borde bg-superficie">
                 <EmptyState
                   compacto
                   ilustracion="cuadrante"
                   titulo="Sin reglas de precio"
-                  descripcion="Esta pista cobra siempre el precio base. Añade una regla para subir el precio en las horas de más demanda."
+                  descripcion="Esta cancha cobra siempre el precio base. Añade una regla para subir el precio en las horas de más demanda."
                   accion={
                     <Button onClick={() => toast.info('Formulario de nueva regla de precio')}>
                       <Plus aria-hidden />
@@ -341,7 +355,7 @@ export default function CanchaDetallePage() {
         <TabsContent value="cierres">
           <Section
             titulo="Cierres puntuales"
-            descripcion="Franjas en las que esta pista no admite reservas."
+            descripcion="Franjas en las que esta cancha no admite reservas."
             acciones={
               <Button size="sm" variant="secundario" asChild>
                 <Link href="/bloqueos">
@@ -351,13 +365,13 @@ export default function CanchaDetallePage() {
               </Button>
             }
           >
-            {cierres.length === 0 ? (
+            {vacio || cierres.length === 0 ? (
               <div className="rounded-lg border border-borde bg-superficie">
                 <EmptyState
                   compacto
                   ilustracion="franja"
                   titulo="Sin cierres programados"
-                  descripcion="Esta pista está disponible en todo su horario. Programa un cierre cuando necesites reservarla para mantenimiento o una clase."
+                  descripcion="Esta cancha está disponible en todo su horario. Programa un cierre cuando necesites cerrarla por mantenimiento o por una clase."
                   accion={
                     <Button asChild>
                       <Link href="/bloqueos">

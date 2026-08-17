@@ -204,3 +204,70 @@ export {
   Separator,
   Avatar,
 }
+
+/* --------------------------------------------------------- ControlSegmentado
+   One segmented control for every "pick one of a few" choice in the product.
+
+   Before this existed there were three different treatments, two of them 40px
+   apart on the metrics screen: bordered pills with a teal outline for the date
+   range, a joined track with a white chip for the granularity, and a joined
+   track with a filled teal chip for the calendar view. Same interaction, three
+   selected-state languages, which is what "assembled from parts" looks like. */
+
+interface OpcionSegmento<T extends string> {
+  valor: T
+  etiqueta: string
+}
+
+interface ControlSegmentadoProps<T extends string> {
+  opciones: OpcionSegmento<T>[]
+  valor: T
+  onCambio: (valor: T) => void
+  /** Accessible name for the group, since the options alone lack context. */
+  etiqueta: string
+  tamano?: 'sm' | 'md'
+  className?: string
+}
+
+function ControlSegmentado<T extends string>({
+  opciones,
+  valor,
+  onCambio,
+  etiqueta,
+  tamano = 'md',
+  className,
+}: ControlSegmentadoProps<T>) {
+  return (
+    <div
+      role="group"
+      aria-label={etiqueta}
+      className={cn(
+        'inline-flex rounded-md border border-borde bg-cal-100 p-0.5',
+        className
+      )}
+    >
+      {opciones.map((opcion) => {
+        const activo = opcion.valor === valor
+        return (
+          <button
+            key={opcion.valor}
+            type="button"
+            onClick={() => onCambio(opcion.valor)}
+            aria-pressed={activo}
+            className={cn(
+              'rounded-sm font-medium transition-colors duration-rapida ease-curva',
+              tamano === 'sm' ? 'px-2 py-0.5 text-2xs' : 'px-2.5 py-1 text-xs',
+              activo
+                ? 'bg-superficie text-tinta shadow-sm'
+                : 'text-apagado hover:text-tinta'
+            )}
+          >
+            {opcion.etiqueta}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+export { ControlSegmentado }

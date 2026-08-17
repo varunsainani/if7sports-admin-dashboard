@@ -17,15 +17,15 @@ import {
 } from 'recharts'
 import { Download, FileText, Table2 } from 'lucide-react'
 
-import { cn } from '@/lib/utils'
 import type { EstadoReserva } from '@/lib/types'
 import { useEstadoVista } from '@/lib/demo-context'
-import { HOY, RANGOS, calcularMetricas, desplazarDias } from '@/lib/mock-data'
+import { HOY, RANGOS, calcularMetricas, desplazarDias, diaSemana } from '@/lib/mock-data'
 import { DIAS_SEMANA, ESTADO_RESERVA, ORDEN_ESTADO_RESERVA } from '@/lib/estados'
 import { euros, eurosCompacto, fechaCorta, numero, porcentaje } from '@/lib/formato'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { MetricCard, PageHeader } from '@/components/ui/page'
+import { ControlSegmentado } from '@/components/ui/controls'
 import { SkeletonGrafico, SkeletonMetrica } from '@/components/ui/skeleton'
 import {
   DropdownMenu,
@@ -141,7 +141,7 @@ function Heatmap({ datos }: { datos: { dia: number; hora: number; reservas: numb
           ))}
           <span className="text-2xs text-apagado">Más</span>
           <span className="ml-auto text-2xs text-apagado numeros-tabulares">
-            Máximo {maximo} reservas en una franja
+            Máximo: {maximo} reservas en una franja
           </span>
         </div>
       </div>
@@ -205,10 +205,14 @@ export default function MetricasPage() {
 
     const cubos = new Map<string, number>()
     for (const punto of m.ingresosPorDia) {
+      // Bucket on the ISO week start, not on day-of-month. Dividing the day
+      // number by seven gives ragged 3/7/3 day "weeks" at every month boundary,
+      // which shows up as a 60% cliff in the line that is pure artefact, and it
+      // labels the axis 1-5 repeatedly so ticks collide across months.
       const clave =
         granularidad === 'mes'
           ? punto.fecha.slice(0, 7)
-          : punto.fecha.slice(0, 8) + String(Math.ceil(Number(punto.fecha.slice(8, 10)) / 7))
+          : desplazarDias(punto.fecha, -(diaSemana(punto.fecha) - 1))
       cubos.set(clave, (cubos.get(clave) ?? 0) + punto.valor)
     }
     return [...cubos.entries()].map(([fecha, valor]) => ({ fecha, valor }))
@@ -224,7 +228,7 @@ export default function MetricasPage() {
 
   function exportar(formato: 'CSV' | 'PDF') {
     toast.exito(`Informe exportado en ${formato}`, {
-      descripcion: `Periodo ${fechaCorta(desde)} a ${fechaCorta(hasta)}.`,
+      descripcion: `Periodo del ${fechaCorta(desde)} al ${fechaCorta(hasta)}.`,
     })
   }
 
@@ -259,11 +263,11 @@ export default function MetricasPage() {
             <DropdownMenuContent>
               <DropdownMenuItem onSelect={() => exportar('CSV')}>
                 <Table2 aria-hidden />
-                Descargar CSV
+                Exportar en CSV
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => exportar('PDF')}>
                 <FileText aria-hidden />
-                Descargar PDF
+                Exportar en PDF
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -275,30 +279,18 @@ export default function MetricasPage() {
           panel below. Splitting it per chart would let two panels disagree. */}
       <div className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-borde bg-superficie px-4 py-3">
         <span className="etiqueta mr-1">Rango</span>
-        {(
-          [
-            ['dia', 'Día'],
-            ['semana', 'Semana'],
-            ['mes', 'Mes'],
-            ['ano', 'Año'],
-            ['custom', 'Personalizado'],
-          ] as [ClaveRango, string][]
-        ).map(([clave, etiqueta]) => (
-          <button
-            key={clave}
-            type="button"
-            onClick={() => setRango(clave)}
-            aria-pressed={rango === clave}
-            className={cn(
-              'rounded border px-2.5 py-1 text-xs transition-colors duration-rapida',
-              rango === clave
-                ? 'border-primario bg-cesped-50 font-medium text-cesped-700'
-                : 'border-borde text-tinta-media hover:border-cal-500 hover:text-tinta'
-            )}
-          >
-            {etiqueta}
-          </button>
-        ))}
+        <ControlSegmentado<ClaveRango>
+          etiqueta="Rango de fechas"
+          valor={rango}
+          onCambio={setRango}
+          opciones={[
+            { valor: 'dia', etiqueta: 'Hoy' },
+            { valor: 'semana', etiqueta: 'Esta semana' },
+            { valor: 'mes', etiqueta: 'Este mes' },
+            { valor: 'ano', etiqueta: 'Todo' },
+            { valor: 'custom', etiqueta: 'Personalizado' },
+          ]}
+        />
       </div>
 
       {/* --------------------------------------------------- headline figures */}
@@ -315,7 +307,7 @@ export default function MetricasPage() {
             <MetricCard
               etiqueta="Total ganado"
               valor={eurosCompacto(m.totalGanado)}
-              nota={`Descontada la comisión de IF7SPORTS (${euros(m.comisionIF7)})`}
+              nota={`Neto de comisión (${euros(m.comisionIF7)})`}
             />
             <MetricCard
               etiqueta="Reservas"
@@ -331,7 +323,7 @@ export default function MetricasPage() {
         )}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         {/* ---------------------------------------------------- revenue line */}
         {cargando ? (
           <SkeletonGrafico />
@@ -343,30 +335,17 @@ export default function MetricasPage() {
             className="lg:col-span-2"
             acciones={
               <>
-                <div className="flex rounded border border-borde-control p-0.5">
-                  {(
-                    [
-                      ['dia', 'Día'],
-                      ['semana', 'Semana'],
-                      ['mes', 'Mes'],
-                    ] as [Granularidad, string][]
-                  ).map(([clave, etiqueta]) => (
-                    <button
-                      key={clave}
-                      type="button"
-                      onClick={() => setGranularidad(clave)}
-                      aria-pressed={granularidad === clave}
-                      className={cn(
-                        'rounded-sm px-2 py-0.5 text-2xs transition-colors duration-rapida',
-                        granularidad === clave
-                          ? 'bg-primario font-medium text-white'
-                          : 'text-tinta-media hover:text-tinta'
-                      )}
-                    >
-                      {etiqueta}
-                    </button>
-                  ))}
-                </div>
+                <ControlSegmentado<Granularidad>
+                  etiqueta="Granularidad de la serie"
+                  tamano="sm"
+                  valor={granularidad}
+                  onCambio={setGranularidad}
+                  opciones={[
+                    { valor: 'dia', etiqueta: 'Día' },
+                    { valor: 'semana', etiqueta: 'Semana' },
+                    { valor: 'mes', etiqueta: 'Mes' },
+                  ]}
+                />
                 <AlternarTabla mostrandoTabla={tablaIngresos} onCambio={setTablaIngresos} />
               </>
             }
@@ -384,7 +363,7 @@ export default function MetricasPage() {
                     dataKey="fecha"
                     {...EJE}
                     tickFormatter={(valor: string) =>
-                      granularidad === 'mes' ? valor : valor.slice(8, 10) || valor.slice(-1)
+                      granularidad === 'mes' ? valor : valor.slice(8, 10)
                     }
                     minTickGap={24}
                   />
@@ -412,7 +391,8 @@ export default function MetricasPage() {
                     dataKey="valor"
                     stroke="var(--grafico-confirmada)"
                     strokeWidth={2}
-                    dot={false}
+                    // A one-point range (Día) draws no path, so show the point.
+                    dot={serieIngresos.length < 2 ? { r: 4 } : false}
                     activeDot={{ r: 4, strokeWidth: 2, stroke: 'var(--superficie)' }}
                     isAnimationActive={false}
                   />
@@ -505,7 +485,7 @@ export default function MetricasPage() {
         ) : (
           <PanelGrafico
             titulo="Campos más utilizados"
-            descripcion="Reservas por cancha en el periodo."
+            descripcion="Reservas registradas en cada una durante el periodo."
             resumen={m.usoPorCancha.map((c) => `${c.canchaNombre}: ${c.reservas}`).join('. ')}
           >
             <ResponsiveContainer width="100%" height={220}>
@@ -555,6 +535,7 @@ export default function MetricasPage() {
             titulo="Horas más alquiladas"
             descripcion="Densidad de reservas por hora y día de la semana."
             resumen="Mapa de calor de reservas por hora del día y día de la semana."
+            className="lg:col-span-2"
           >
             <Heatmap datos={m.usoPorHora} />
           </PanelGrafico>
@@ -571,7 +552,7 @@ export default function MetricasPage() {
               .map((o) => `${o.canchaNombre}: ${o.porcentaje} por ciento`)
               .join('. ')}
           >
-            <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-5 pt-2 sm:grid-cols-4">
               {m.ocupacionPorCancha.map((o) => (
                 <Medidor key={o.canchaId} etiqueta={o.canchaNombre} valor={o.porcentaje} />
               ))}
@@ -654,7 +635,7 @@ export default function MetricasPage() {
                   dataKey="valor"
                   stroke="var(--grafico-cancelada)"
                   strokeWidth={2}
-                  dot={false}
+                  dot={m.cancelacionesPorDia.length < 2 ? { r: 4 } : false}
                   activeDot={{ r: 4, strokeWidth: 2, stroke: 'var(--superficie)' }}
                   isAnimationActive={false}
                 />
@@ -704,7 +685,7 @@ export default function MetricasPage() {
                   dataKey="valor"
                   stroke="var(--grafico-pendiente)"
                   strokeWidth={2}
-                  dot={false}
+                  dot={m.devolucionesPorDia.length < 2 ? { r: 4 } : false}
                   activeDot={{ r: 4, strokeWidth: 2, stroke: 'var(--superficie)' }}
                   isAnimationActive={false}
                 />
