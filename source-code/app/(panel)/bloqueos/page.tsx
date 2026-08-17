@@ -14,6 +14,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { PageHeader } from '@/components/ui/page'
 import { Campo, Input, Textarea } from '@/components/ui/input'
 import { SelectorHora } from '@/components/ui/selector-hora'
+import { FiltroRangoFechas, type RangoFiltro } from '@/components/ui/selector-fecha'
 import {
   FiltroSelect,
   Select,
@@ -174,15 +175,17 @@ export default function BloqueosPage() {
   const [modalAbierto, setModalAbierto] = React.useState(false)
   const [cancha, setCancha] = React.useState('todos')
   const [motivo, setMotivo] = React.useState('todos')
+  const [rango, setRango] = React.useState<RangoFiltro | null>(null)
 
   const datos = React.useMemo(() => {
     if (estadoVista === 'empty') return []
     return bloqueos.filter((bloqueo) => {
       if (cancha !== 'todos' && bloqueo.canchaId !== cancha) return false
       if (motivo !== 'todos' && bloqueo.motivo !== motivo) return false
+      if (rango && (bloqueo.fecha < rango.desde || bloqueo.fecha > rango.hasta)) return false
       return true
     })
-  }, [cancha, motivo, estadoVista])
+  }, [cancha, motivo, rango, estadoVista])
 
   const columns = React.useMemo<ColumnDef<Bloqueo, unknown>[]>(
     () => [
@@ -265,7 +268,7 @@ export default function BloqueosPage() {
     []
   )
 
-  const hayFiltros = cancha !== 'todos' || motivo !== 'todos'
+  const hayFiltros = cancha !== 'todos' || motivo !== 'todos' || rango !== null
 
   return (
     <>
@@ -307,6 +310,8 @@ export default function BloqueosPage() {
               }))}
             />
 
+            <FiltroRangoFechas valor={rango} onCambio={setRango} />
+
             <span className="ml-auto text-2xs text-apagado numeros-tabulares">
               {datos.length} {datos.length === 1 ? 'bloqueo' : 'bloqueos'}
             </span>
@@ -334,6 +339,7 @@ export default function BloqueosPage() {
                   onClick={() => {
                     setCancha('todos')
                     setMotivo('todos')
+                    setRango(null)
                   }}
                 >
                   Quitar filtros

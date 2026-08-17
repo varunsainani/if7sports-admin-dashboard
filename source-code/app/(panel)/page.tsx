@@ -324,11 +324,11 @@ export default function DashboardPage() {
                       'transition-colors duration-rapida hover:bg-cesped-50'
                     )}
                   >
-                    <span className="w-24 shrink-0 font-mono text-2xs text-apagado">
+                    <span className="hidden w-24 shrink-0 font-mono text-2xs text-apagado sm:block">
                       {reserva.id}
                     </span>
 
-                    <span className="w-[300px] shrink-0">
+                    <span className="min-w-0 flex-1 xl:w-[300px] xl:flex-none">
                       <span className="block truncate text-base font-medium text-tinta">
                         {reserva.clienteNombre}
                       </span>
@@ -337,13 +337,14 @@ export default function DashboardPage() {
                       </span>
                     </span>
 
-                    <span className="w-32 shrink-0 font-mono text-xs text-tinta-media numeros-tabulares">
+                    <span className="hidden w-32 shrink-0 font-mono text-xs text-tinta-media numeros-tabulares lg:block">
                       {reserva.horaInicio} a {reserva.horaFin}
                     </span>
 
                     <span className="ml-auto flex shrink-0 items-center gap-2.5">
                       <BadgeReserva estado={reserva.estado} />
-                      <BadgePago estado={reserva.estadoPago} />
+                      <BadgePago estado={reserva.estadoPago} soloIcono className="xl:hidden" />
+                      <BadgePago estado={reserva.estadoPago} className="hidden xl:inline-flex" />
                       <span className="w-20 text-right font-mono text-sm text-tinta numeros-tabulares">
                         {euros(reserva.importe)}
                       </span>

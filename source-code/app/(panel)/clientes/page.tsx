@@ -4,7 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Eye, Mail, MessageCircle, MoreHorizontal, Search } from 'lucide-react'
+import { Eye, Mail, MessageCircle, MoreHorizontal, Plus, Search } from 'lucide-react'
 
 import type { Cliente } from '@/lib/types'
 import { useEstadoVista } from '@/lib/demo-context'
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { EmptyState } from '@/components/ui/empty-state'
 import { PageHeader } from '@/components/ui/page'
 import { FiltroSelect } from '@/components/ui/select'
+import { FiltroRangoFechas, type RangoFiltro } from '@/components/ui/selector-fecha'
 import { Avatar } from '@/components/ui/controls'
 import { CeldaNumerica, CeldaPrincipal, DataTable } from '@/components/ui/data-table'
 import {
@@ -40,6 +41,7 @@ export default function ClientesPage() {
   const [busqueda, setBusqueda] = React.useState('')
   const [estadoReserva, setEstadoReserva] = React.useState('todos')
   const [cancha, setCancha] = React.useState('todos')
+  const [rango, setRango] = React.useState<RangoFiltro | null>(null)
 
   const datos = React.useMemo(() => {
     if (estadoVista === 'empty') return []
@@ -57,7 +59,7 @@ export default function ClientesPage() {
         if (!coincide) return false
       }
 
-      if (estadoReserva === 'todos' && cancha === 'todos') return true
+      if (estadoReserva === 'todos' && cancha === 'todos' && !rango) return true
 
       // Filtering clients by properties of their bookings, which is what the
       // brief's "estado de reserva" and "cancha reservada" filters mean here.
@@ -65,10 +67,11 @@ export default function ClientesPage() {
       return suyas.some((reserva) => {
         if (estadoReserva !== 'todos' && reserva.estado !== estadoReserva) return false
         if (cancha !== 'todos' && reserva.canchaId !== cancha) return false
+        if (rango && (reserva.fecha < rango.desde || reserva.fecha > rango.hasta)) return false
         return true
       })
     })
-  }, [busqueda, estadoReserva, cancha, estadoVista])
+  }, [busqueda, estadoReserva, cancha, rango, estadoVista])
 
   const columns = React.useMemo<ColumnDef<Cliente, unknown>[]>(
     () => [
@@ -171,7 +174,8 @@ export default function ClientesPage() {
     []
   )
 
-  const hayFiltros = estadoReserva !== 'todos' || cancha !== 'todos' || busqueda.length > 0
+  const hayFiltros =
+    estadoReserva !== 'todos' || cancha !== 'todos' || rango !== null || busqueda.length > 0
 
   return (
     <>
@@ -217,6 +221,12 @@ export default function ClientesPage() {
               opciones={canchasActivas.map((c) => ({ valor: c.id, etiqueta: c.nombre }))}
             />
 
+            <FiltroRangoFechas
+              valor={rango}
+              onCambio={setRango}
+              etiquetaVacia="Cualquier fecha de reserva"
+            />
+
             <span className="ml-auto text-2xs text-apagado numeros-tabulares">
               {datos.length} {datos.length === 1 ? 'cliente' : 'clientes'}
             </span>
@@ -233,6 +243,14 @@ export default function ClientesPage() {
                 ? 'Prueba con otro nombre, correo o teléfono, o quita los filtros.'
                 : 'En cuanto alguien reserve una cancha aparecerá aquí con su historial completo.'
             }
+            accion={
+              <Button asChild>
+                <Link href="/reservas?nueva=1">
+                  <Plus aria-hidden />
+                  Nueva reserva manual
+                </Link>
+              </Button>
+            }
             accionSecundaria={
               hayFiltros ? (
                 <Button
@@ -241,6 +259,7 @@ export default function ClientesPage() {
                     setBusqueda('')
                     setEstadoReserva('todos')
                     setCancha('todos')
+                    setRango(null)
                   }}
                 >
                   Quitar filtros

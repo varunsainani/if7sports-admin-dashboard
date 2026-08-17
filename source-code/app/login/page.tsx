@@ -98,6 +98,7 @@ export default function LoginPage() {
   const [paso, setPaso] = React.useState<Paso>('credenciales')
   const [correo, setCorreo] = React.useState('maria@ciutatdellevant.es')
   const [codigo, setCodigo] = React.useState('')
+  const [enviando, setEnviando] = React.useState(false)
 
   return (
     <div className="grid min-h-screen grid-rows-1 lg:grid-cols-[minmax(0,440px)_1fr]">
@@ -126,7 +127,12 @@ export default function LoginPage() {
                 className="mt-7 space-y-4"
                 onSubmit={(evento) => {
                   evento.preventDefault()
-                  setPaso('dos_factores')
+                  // The loading state of a login form is the submit in flight.
+                  setEnviando(true)
+                  setTimeout(() => {
+                    setEnviando(false)
+                    setPaso('dos_factores')
+                  }, 700)
                 }}
               >
                 <Campo etiqueta="Correo electrónico" htmlFor="login-correo" requerido>
@@ -148,8 +154,8 @@ export default function LoginPage() {
                   />
                 </Campo>
 
-                <Button type="submit" size="lg" className="w-full">
-                  Entrar
+                <Button type="submit" size="lg" className="w-full" cargando={enviando}>
+                  {enviando ? 'Comprobando…' : 'Entrar'}
                 </Button>
 
                 <div className="flex items-center justify-between gap-3 pt-1">

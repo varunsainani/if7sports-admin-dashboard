@@ -134,17 +134,23 @@ export default function CanchaDetallePage() {
                 {cancha.imagenes.map((imagen) => (
                   <div
                     key={imagen}
-                    className="flex items-center gap-3 rounded-lg border border-borde bg-superficie px-3 py-2"
+                    className="overflow-hidden rounded-lg border border-borde bg-superficie"
                   >
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded bg-cesped-50">
-                      <IconoCancha tipo={cancha.tipo} className="size-4 text-cesped-600" />
-                    </span>
-                    <span className="min-w-0 flex-1 truncate text-xs text-tinta-media">
-                      {imagen.split('/').pop()}
-                    </span>
-                    <Button variant="fantasma" size="icono-sm" aria-label="Eliminar imagen">
-                      <Trash2 aria-hidden />
-                    </Button>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imagen}
+                      alt={`Fotografía de ${cancha.nombre}`}
+                      className="h-32 w-full object-cover"
+                    />
+                    <div className="flex items-center gap-2 border-t border-borde px-3 py-2">
+                      <IconoCancha tipo={cancha.tipo} className="size-3.5 shrink-0 text-cal-500" />
+                      <span className="min-w-0 flex-1 truncate text-xs text-tinta-media">
+                        {imagen.split('/').pop()}
+                      </span>
+                      <Button variant="fantasma" size="icono-sm" aria-label="Eliminar imagen">
+                        <Trash2 aria-hidden />
+                      </Button>
+                    </div>
                   </div>
                 ))}
 

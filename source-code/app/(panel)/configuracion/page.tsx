@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/controls'
 import { Campo, Input } from '@/components/ui/input'
 import { SelectorHora } from '@/components/ui/selector-hora'
+import { CalendarioAnual } from '@/components/ui/calendario-anual'
+import { EmptyState } from '@/components/ui/empty-state'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { PageHeaderSkeleton, Section } from '@/components/ui/page'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -139,9 +141,12 @@ export default function ConfiguracionPage() {
                 key={imagen}
                 className="group relative overflow-hidden rounded-lg border border-borde bg-cal-100"
               >
-                <div className="flex h-28 items-center justify-center">
-                  <ImagePlus className="size-6 text-cal-400" aria-hidden />
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imagen}
+                  alt={`Fotografía del polideportivo: ${imagen.split('/').pop()}`}
+                  className="h-28 w-full object-cover"
+                />
                 <div className="flex items-center justify-between gap-2 border-t border-borde bg-superficie px-2.5 py-1.5">
                   <span className="truncate text-2xs text-apagado">
                     {imagen.split('/').pop()}
@@ -259,6 +264,40 @@ export default function ConfiguracionPage() {
               </CardDescription>
             </div>
           </CardHeader>
+
+          <CardContent className="border-t border-borde pt-5">
+            <CalendarioAnual
+              ano={2026}
+              festivos={vacio ? [] : polideportivo.festivos}
+              onElegirDia={(fecha, festivo) =>
+                festivo
+                  ? toast.info(festivo.nombre, {
+                      descripcion:
+                        festivo.tipo === 'cerrado'
+                          ? 'Cerrado todo el día. Aquí se abriría su edición.'
+                          : `Abierto de ${festivo.apertura} a ${festivo.cierre}. Aquí se abriría su edición.`,
+                    })
+                  : toast.info('Marcar como festivo', {
+                      descripcion: `Aquí se abriría el alta de cierre para el ${fecha}.`,
+                    })
+              }
+            />
+          </CardContent>
+
+          {vacio && (
+            <EmptyState
+              compacto
+              ilustracion="franja"
+              titulo="Sin festivos ni cierres marcados"
+              descripcion="Marca en el calendario los días en los que el polideportivo cierra o abre con horario reducido."
+              accion={
+                <Button onClick={() => toast.info('Formulario de nuevo festivo')}>
+                  <Plus aria-hidden />
+                  Añadir festivo
+                </Button>
+              }
+            />
+          )}
 
           <ul className="divide-y divide-borde border-t border-borde">
             {(vacio ? [] : polideportivo.festivos).map((festivo) => (

@@ -14,9 +14,9 @@ export const polideportivo: Polideportivo = {
   telefono: '+34 963 45 12 08',
   correo: 'reservas@ciutatdellevant.es',
   imagenes: [
-    '/imagenes/polideportivo-entrada.jpg',
-    '/imagenes/polideportivo-pistas.jpg',
-    '/imagenes/polideportivo-vestuarios.jpg',
+    '/imagenes/polideportivo-entrada.svg',
+    '/imagenes/polideportivo-pistas.svg',
+    '/imagenes/polideportivo-vestuarios.svg',
   ],
 
   // Longer hours at the weekend, and a late close on Friday. Facilities like

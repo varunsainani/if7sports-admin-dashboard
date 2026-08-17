@@ -15,7 +15,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { Download, FileText, Table2 } from 'lucide-react'
+import Link from 'next/link'
+import { CalendarDays, Download, FileText, Table2 } from 'lucide-react'
 
 import type { EstadoReserva } from '@/lib/types'
 import { useEstadoVista } from '@/lib/demo-context'
@@ -26,6 +27,7 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { MetricCard, PageHeader } from '@/components/ui/page'
 import { ControlSegmentado } from '@/components/ui/controls'
+import { FiltroRangoFechas, type RangoFiltro } from '@/components/ui/selector-fecha'
 import { SkeletonGrafico, SkeletonMetrica } from '@/components/ui/skeleton'
 import {
   DropdownMenu,
@@ -184,6 +186,7 @@ function Medidor({ etiqueta, valor }: { etiqueta: string; valor: number }) {
 export default function MetricasPage() {
   const estadoVista = useEstadoVista()
   const [rango, setRango] = React.useState<ClaveRango>('mes')
+  const [personalizado, setPersonalizado] = React.useState<RangoFiltro | null>(null)
   const [granularidad, setGranularidad] = React.useState<Granularidad>('dia')
   const [tablaIngresos, setTablaIngresos] = React.useState(false)
   const [tablaEstados, setTablaEstados] = React.useState(false)
@@ -192,9 +195,11 @@ export default function MetricasPage() {
   const vacio = estadoVista === 'empty'
 
   const { desde, hasta } = React.useMemo(() => {
-    if (rango === 'custom') return { desde: desplazarDias(HOY, -14), hasta: HOY }
+    if (rango === 'custom') {
+      return personalizado ?? { desde: desplazarDias(HOY, -14), hasta: HOY }
+    }
     return { desde: RANGOS[rango].desde, hasta: RANGOS[rango].hasta }
-  }, [rango])
+  }, [rango, personalizado])
 
   const m = React.useMemo(() => calcularMetricas(desde, hasta), [desde, hasta])
 
@@ -241,6 +246,14 @@ export default function MetricasPage() {
             ilustracion="cuadrante"
             titulo="Todavía no hay datos que medir"
             descripcion="En cuanto el polideportivo empiece a registrar reservas, aquí verás facturación, ocupación, horas punta y clientes recurrentes."
+            accion={
+              <Button asChild>
+                <Link href="/reservas">
+                  <CalendarDays aria-hidden />
+                  Ir al calendario de reservas
+                </Link>
+              </Button>
+            }
           />
         </div>
       </>
@@ -291,6 +304,17 @@ export default function MetricasPage() {
             { valor: 'custom', etiqueta: 'Personalizado' },
           ]}
         />
+
+        {/* Only meaningful once "Personalizado" is chosen, so it appears with
+            it rather than sitting inert beside the presets. */}
+        {rango === 'custom' && (
+          <FiltroRangoFechas
+            valor={personalizado}
+            onCambio={setPersonalizado}
+            etiquetaVacia="Elige un rango"
+            className="ml-1"
+          />
+        )}
       </div>
 
       {/* --------------------------------------------------- headline figures */}
@@ -303,6 +327,7 @@ export default function MetricasPage() {
               etiqueta="Total facturado"
               valor={eurosCompacto(m.totalFacturado)}
               nota="Reservas confirmadas y completadas"
+              tendencia={m.tendenciaFacturacion.map((p) => p.valor)}
             />
             <MetricCard
               etiqueta="Total ganado"
@@ -318,6 +343,7 @@ export default function MetricasPage() {
               etiqueta="Ocupación global"
               valor={porcentaje(m.ocupacionGlobal)}
               nota="Media de todas las canchas activas"
+              medidor={m.ocupacionGlobal}
             />
           </>
         )}

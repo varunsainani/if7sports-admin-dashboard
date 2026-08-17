@@ -10,7 +10,6 @@ import type { Cancha } from '@/lib/types'
 import { useEstadoVista } from '@/lib/demo-context'
 import { canchas } from '@/lib/mock-data'
 import { ORDEN_TIPO_CANCHA, TIPO_CANCHA } from '@/lib/estados'
-import { IconoCancha } from '@/components/ui/icono-cancha'
 import { euros } from '@/lib/formato'
 import { Button } from '@/components/ui/button'
 import { BadgeEstadoCancha } from '@/components/ui/badge'
@@ -56,9 +55,12 @@ export default function CanchasPage() {
         cell: ({ row }) => {
           return (
             <div className="flex items-center gap-2.5">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded bg-cesped-50">
-                <IconoCancha tipo={row.original.tipo} className="size-4 text-cesped-600" />
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={row.original.imagenes[0]}
+                alt=""
+                className="size-10 shrink-0 rounded border border-borde object-cover"
+              />
               <CeldaPrincipal secundario={row.original.descripcion}>
                 {row.original.nombre}
               </CeldaPrincipal>

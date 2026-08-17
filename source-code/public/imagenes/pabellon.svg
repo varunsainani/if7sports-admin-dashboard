@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" width="800" height="520" role="img">
+<rect width="800" height="520" fill="#c98f4e"/>
+  <rect x="0" y="0" width="800" height="26" fill="#d69a57" opacity="0.2"/><rect x="0" y="26" width="800" height="26" fill="#d69a57" opacity="0.5"/><rect x="0" y="52" width="800" height="26" fill="#d69a57" opacity="0.2"/><rect x="0" y="78" width="800" height="26" fill="#d69a57" opacity="0.5"/><rect x="0" y="104" width="800" height="26" fill="#d69a57" opacity="0.2"/><rect x="0" y="130" width="800" height="26" fill="#d69a57" opacity="0.5"/><rect x="0" y="156" width="800" height="26" fill="#d69a57" opacity="0.2"/><rect x="0" y="182" width="800" height="26" fill="#d69a57" opacity="0.5"/><rect x="0" y="208" width="800" height="26" fill="#d69a57" opacity="0.2"/><rect x="0" y="234" width="800" height="26" fill="#d69a57" opacity="0.5"/><rect x="0" y="260" width="800" height="26" fill="#d69a57" opacity="0.2"/><rect x="0" y="286" width="800" height="26" fill="#d69a57" opacity="0.5"/><rect x="0" y="312" width="800" height="26" fill="#d69a57" opacity="0.2"/><rect x="0" y="338" width="800" height="26" fill="#d69a57" opacity="0.5"/><rect x="0" y="364" width="800" height="26" fill="#d69a57" opacity="0.2"/><rect x="0" y="390" width="800" height="26" fill="#d69a57" opacity="0.5"/><rect x="0" y="416" width="800" height="26" fill="#d69a57" opacity="0.2"/><rect x="0" y="442" width="800" height="26" fill="#d69a57" opacity="0.5"/><rect x="0" y="468" width="800" height="26" fill="#d69a57" opacity="0.2"/><rect x="0" y="494" width="800" height="26" fill="#d69a57" opacity="0.5"/>
+  <g stroke="#f7efe2" stroke-width="4" fill="none" opacity="0.9">
+    <rect x="50" y="40" width="700" height="440"/>
+    <line x1="400" y1="40" x2="400" y2="480"/>
+    <circle cx="400" cy="260" r="70"/>
+    <rect x="50" y="160" width="130" height="200"/>
+    <rect x="620" y="160" width="130" height="200"/>
+    <path d="M180 160 A100 100 0 0 1 180 360"/>
+    <path d="M620 160 A100 100 0 0 0 620 360"/>
+  </g>
+</svg>

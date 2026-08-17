@@ -68,9 +68,62 @@ function Section({ titulo, descripcion, acciones, children, className }: Section
    size on the screen. The label sits above it, small and quiet, because you
    read the number first and then check what it measures. */
 
+/** Sparkline for the "número grande + línea de tendencia" the brief asks for. */
+function Tendencia({ valores }: { valores: number[] }) {
+  if (valores.length < 2) return null
+
+  const max = Math.max(...valores)
+  const min = Math.min(...valores)
+  const span = max - min || 1
+  const paso = 100 / (valores.length - 1)
+
+  const d = valores
+    .map((v, i) => `${i === 0 ? 'M' : 'L'} ${(i * paso).toFixed(2)} ${(28 - ((v - min) / span) * 26).toFixed(2)}`)
+    .join(' ')
+
+  return (
+    <svg
+      viewBox="0 0 100 30"
+      preserveAspectRatio="none"
+      className="mt-3 h-8 w-full"
+      aria-hidden
+    >
+      <path d={d} fill="none" stroke="var(--grafico-confirmada)" strokeWidth="1.5"
+        vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/** Compact ring, so the headline occupancy figure reads as a gauge. */
+function Anillo({ valor }: { valor: number }) {
+  const radio = 15
+  const circunferencia = 2 * Math.PI * radio
+  const relleno = (Math.min(100, Math.max(0, valor)) / 100) * circunferencia
+
+  return (
+    <svg viewBox="0 0 40 40" className="size-10 -rotate-90 shrink-0" aria-hidden>
+      <circle cx="20" cy="20" r={radio} fill="none" stroke="var(--cal-200)" strokeWidth="5" />
+      <circle
+        cx="20"
+        cy="20"
+        r={radio}
+        fill="none"
+        stroke="var(--grafico-confirmada)"
+        strokeWidth="5"
+        strokeLinecap="round"
+        strokeDasharray={`${relleno} ${circunferencia}`}
+      />
+    </svg>
+  )
+}
+
 interface MetricCardProps {
   etiqueta: string
   valor: string
+  /** Values for the sparkline under the figure. */
+  tendencia?: number[]
+  /** Percentage 0-100, drawn as a ring beside the figure. */
+  medidor?: number
   /** Period-over-period movement. Omit when there is nothing to compare to. */
   variacion?: number
   /** What the variation is measured against, e.g. "vs. mes anterior". */
@@ -84,6 +137,8 @@ interface MetricCardProps {
 function MetricCard({
   etiqueta,
   valor,
+  tendencia,
+  medidor,
   variacion,
   comparacion,
   icono,
@@ -108,9 +163,12 @@ function MetricCard({
         )}
       </div>
 
-      <p className="mt-2 font-display text-3xl font-semibold tracking-display text-tinta numeros-tabulares">
-        {valor}
-      </p>
+      <div className="mt-2 flex items-center gap-3">
+        <p className="font-display text-3xl font-semibold tracking-display text-tinta numeros-tabulares">
+          {valor}
+        </p>
+        {medidor !== undefined && <Anillo valor={medidor} />}
+      </div>
 
       {variacion !== undefined && (
         <div className="mt-2 flex items-center gap-1.5">
@@ -132,6 +190,7 @@ function MetricCard({
       )}
 
       {nota && <p className="mt-2 text-xs text-apagado">{nota}</p>}
+      {tendencia && <Tendencia valores={tendencia} />}
     </div>
   )
 }

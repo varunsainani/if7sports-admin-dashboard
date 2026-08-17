@@ -3,7 +3,9 @@ import Link from 'next/link'
 /** Minimal, as the brief asks: version, help link, copyright. */
 export function Footer() {
   return (
-    <footer className="mt-auto border-t border-borde px-6 py-4">
+    // Extra bottom room so the floating review panel never covers the
+    // copyright, which the brief requires to be present.
+    <footer className="mt-auto border-t border-borde px-6 pb-16 pt-4">
       <div className="flex flex-wrap items-center justify-between gap-3 text-2xs text-apagado">
         <p>
           Panel de polideportivo{' '}

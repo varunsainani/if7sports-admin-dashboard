@@ -23,6 +23,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/empty-state'
 import { PageHeader } from '@/components/ui/page'
 import { ControlSegmentado } from '@/components/ui/controls'
+import { FiltroRangoFechas, type RangoFiltro } from '@/components/ui/selector-fecha'
 import { SkeletonCalendario } from '@/components/ui/skeleton'
 import {
   Select,
@@ -243,16 +244,23 @@ function VistaSemanal({
                     return (
                       <div
                         key={fecha}
-                        className="trama-bloqueo flex h-9 items-center justify-center rounded-sm border border-borde-fuerte px-1 text-[10px] text-bloqueo-texto"
+                        className="trama-bloqueo flex h-9 flex-col justify-center rounded-sm border border-borde-fuerte px-1.5 leading-tight text-bloqueo-texto"
                         title={
                           bloqueo.instructorNombre
                             ? `${MOTIVO_BLOQUEO[bloqueo.motivo].etiqueta} · ${bloqueo.instructorNombre}`
                             : MOTIVO_BLOQUEO[bloqueo.motivo].etiqueta
                         }
                       >
-                        <span className="truncate">
+                        <span className="truncate text-[10px] font-medium">
                           {MOTIVO_BLOQUEO[bloqueo.motivo].etiqueta}
                         </span>
+                        {/* The brief asks for the instructor on the franja, not
+                            only in a tooltip. */}
+                        {bloqueo.instructorNombre && (
+                          <span className="truncate text-[9px] opacity-80">
+                            {bloqueo.instructorNombre}
+                          </span>
+                        )}
                       </div>
                     )
                   }
@@ -316,6 +324,7 @@ function CalendarioReservas() {
   const [ancla, setAncla] = React.useState(HOY)
   const [canchaFiltro, setCanchaFiltro] = React.useState('todos')
   const [estadoFiltro, setEstadoFiltro] = React.useState('todos')
+  const [rango, setRango] = React.useState<RangoFiltro | null>(null)
   const [reservaAbierta, setReservaAbierta] = React.useState<Reserva | null>(null)
   const [modalAbierto, setModalAbierto] = React.useState(false)
 
@@ -365,16 +374,19 @@ function CalendarioReservas() {
     return reservasEntre(desde, hasta).filter((r) => {
       if (canchaFiltro !== 'todos' && r.canchaId !== canchaFiltro) return false
       if (estadoFiltro !== 'todos' && r.estado !== estadoFiltro) return false
+      if (rango && (r.fecha < rango.desde || r.fecha > rango.hasta)) return false
       return true
     })
-  }, [desde, hasta, canchaFiltro, estadoFiltro, vacio])
+  }, [desde, hasta, canchaFiltro, estadoFiltro, rango, vacio])
 
   const bloqueos = React.useMemo(() => {
     if (vacio) return []
-    return bloqueosEntre(desde, hasta).filter(
-      (b) => canchaFiltro === 'todos' || b.canchaId === canchaFiltro
-    )
-  }, [desde, hasta, canchaFiltro, vacio])
+    return bloqueosEntre(desde, hasta).filter((b) => {
+      if (canchaFiltro !== 'todos' && b.canchaId !== canchaFiltro) return false
+      if (rango && (b.fecha < rango.desde || b.fecha > rango.hasta)) return false
+      return true
+    })
+  }, [desde, hasta, canchaFiltro, rango, vacio])
 
   function abrir(reserva: Reserva) {
     setReservaAbierta(reserva)
@@ -396,7 +408,7 @@ function CalendarioReservas() {
     })
   }
 
-  const hayFiltros = canchaFiltro !== 'todos' || estadoFiltro !== 'todos'
+  const hayFiltros = canchaFiltro !== 'todos' || estadoFiltro !== 'todos' || rango !== null
 
   return (
     <>
@@ -475,6 +487,16 @@ function CalendarioReservas() {
               </SelectContent>
             </Select>
 
+            <FiltroRangoFechas
+              valor={rango}
+              onCambio={(nuevo) => {
+                setRango(nuevo)
+                // Move the view to the range, otherwise a range outside the
+                // month on screen silently empties the grid.
+                if (nuevo) setAncla(nuevo.desde)
+              }}
+            />
+
             <Select value={estadoFiltro} onValueChange={setEstadoFiltro}>
               <SelectTrigger size="sm" aria-label="Filtrar por estado" className="w-auto min-w-40">
                 <SelectValue />
@@ -527,6 +549,7 @@ function CalendarioReservas() {
                     onClick={() => {
                       setCanchaFiltro('todos')
                       setEstadoFiltro('todos')
+                      setRango(null)
                     }}
                   >
                     Quitar filtros

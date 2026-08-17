@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { notFound, useParams } from 'next/navigation'
-import { ArrowLeft, Mail, MessageCircle, Phone } from 'lucide-react'
+import { ArrowLeft, Mail, MessageCircle, Phone, Plus } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import type { Reserva } from '@/lib/types'
@@ -160,6 +160,14 @@ export default function ClienteDetallePage() {
               ilustracion="cuadrante"
               titulo="Este cliente todavía no tiene reservas"
               descripcion="Cuando reserve una cancha, el historial completo aparecerá aquí con su estado y su importe."
+              accion={
+                <Button asChild>
+                  <Link href="/reservas?nueva=1">
+                    <Plus aria-hidden />
+                    Crear una reserva
+                  </Link>
+                </Button>
+              }
             />
           ) : (
             <ul className="divide-y divide-borde">

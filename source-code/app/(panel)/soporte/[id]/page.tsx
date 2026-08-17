@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { notFound, useParams } from 'next/navigation'
-import { ArrowLeft, Paperclip, Send } from 'lucide-react'
+import { ArrowLeft, Paperclip, Plus, Send } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { useEstadoVista } from '@/lib/demo-context'
@@ -86,6 +86,14 @@ export default function TicketDetallePage() {
             ilustracion="lista"
             titulo="Esta solicitud no tiene mensajes"
             descripcion="En cuanto escribas o IF7SPORTS responda, la conversación aparecerá aquí."
+            accion={
+              <Button asChild>
+                <Link href="/soporte">
+                  <Plus aria-hidden />
+                  Abrir una solicitud nueva
+                </Link>
+              </Button>
+            }
           />
         </div>
       )}

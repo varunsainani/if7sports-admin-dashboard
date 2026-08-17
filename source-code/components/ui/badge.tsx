@@ -53,7 +53,7 @@ function BadgeReserva({ estado, variante = 'tint', className }: BadgeReservaProp
       className={cn(
         base,
         config[variante],
-        variante === 'solido' && 'px-3 py-1 text-sm',
+        variante === 'solido' && 'px-3.5 py-1.5 text-md font-semibold tracking-tight',
         className
       )}
     >
