@@ -56,6 +56,36 @@ function demanda(hora: number, dia: number): number {
   return 0.12
 }
 
+/**
+ * Which client a booking belongs to.
+ *
+ * Deliberately not a uniform pick. A real facility has a core of regulars who
+ * book weekly and a long tail who turn up occasionally, so the curve below
+ * skews hard toward the start of the list. Spreading bookings evenly instead
+ * makes every single client active in any given month, which turns the
+ * "clientes activos" metric into a restatement of the total and flattens the
+ * recurring-clients top ten into a tie.
+ */
+const EXPONENTE_FIDELIDAD = 1.25
+
+/** The last fifth of the client list stopped booking a month ago. */
+const INICIO_INACTIVOS = Math.floor(personas.length * 0.8)
+const DIAS_DESDE_BAJA = 30
+
+function indiceCliente(semilla: number, offsetDias: number): number {
+  const sesgado = Math.pow(aleatorio(semilla), EXPONENTE_FIDELIDAD)
+  const indice = Math.min(personas.length - 1, Math.floor(sesgado * personas.length))
+
+  // Churned clients only appear in the older half of the window. Without this
+  // every client books in every month and "clientes activos" degenerates into
+  // a restatement of the total client count.
+  if (indice >= INICIO_INACTIVOS && offsetDias > -DIAS_DESDE_BAJA) {
+    return Math.floor(sesgado * INICIO_INACTIVOS)
+  }
+
+  return indice
+}
+
 /** Price for a court at a given hour, applying its own rules over the base. */
 function precioDe(canchaIndice: number, hora: number, dia: number): number {
   const cancha = canchasActivas[canchaIndice]
@@ -200,7 +230,7 @@ function generarReservas(): Reserva[] {
 
         contador += 1
         const id = `RSV-${String(2400 + contador).padStart(5, '0')}`
-        const persona = elegir(personas, semilla * 3)
+        const persona = personas[indiceCliente(semilla * 3, offset)]
         const estado = estadoPara(offset, semilla * 7)
         const horaInicio = `${String(hora).padStart(2, '0')}:00`
         const duracion = cancha.tipo === 'padel' || cancha.tipo === 'tenis' ? 1 : 1
