@@ -120,6 +120,38 @@
   --bloqueo-trama: rgba(18, 33, 30, 0.16);
   --bloqueo-texto: var(--cal-700);
 
+  /* =========================================================== gráficos
+     Chart marks are large solid areas on white, while the badge steps above
+     are small tinted chips inside dense text. The same hue needs a different
+     step in each context: the badge steps are deliberately calm, and using
+     them as chart fills fails colour-vision separation.
+
+     Measured with the palette validator across every pair, not just adjacent
+     ones, because a donut wraps: worst pair 10.0 ΔE under deuteranopia, 15.3
+     under normal vision, chroma above the grey floor, all four at or above
+     3:1 against the surface.
+
+     The badge steps failed that test at 4.8 ΔE between confirmada and
+     cancelada, which is the classic red-green trap: a colour-blind reader
+     could not tell a cancelled booking from a confirmed one. */
+  --grafico-confirmada: #00806a;
+  --grafico-pendiente: #d08214;
+  --grafico-completada: #3f6fb8;
+  --grafico-cancelada: #c0392b;
+
+  /* Single-hue ramp for magnitude: the occupancy heatmap and the bar chart.
+     Sequential means one hue light to dark, never a rainbow. */
+  --grafico-seq-1: #e3efec;
+  --grafico-seq-2: #b9d8d0;
+  --grafico-seq-3: #7fbcaf;
+  --grafico-seq-4: #3f9a86;
+  --grafico-seq-5: #0e7761;
+  --grafico-seq-6: #075243;
+
+  /* Recessive chart furniture. Grid lines must never compete with the marks. */
+  --grafico-rejilla: var(--cal-200);
+  --grafico-eje: var(--cal-500);
+
   /* =============================================================== feedback */
   --exito: #0e5c4f;
   --aviso: #a96617;

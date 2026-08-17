@@ -106,6 +106,20 @@ const pairs = [
   // non-text UI boundaries: 3:1 is the bar
   ['Control border on surface',       resolve('borde-control'),     resolve('superficie'),       3.0],
   ['Control border on page ground',   resolve('borde-control'),     resolve('fondo'),            3.0],
+
+  // Chart marks are non-text too, so 3:1 against the surface they sit on.
+  // Colour-vision separation between these four is checked separately with the
+  // palette validator; this only covers their visibility against the surface.
+  ['Chart confirmada on surface',     resolve('grafico-confirmada'), resolve('superficie'),      3.0],
+  ['Chart pendiente on surface',      resolve('grafico-pendiente'),  resolve('superficie'),      3.0],
+  ['Chart completada on surface',     resolve('grafico-completada'), resolve('superficie'),      3.0],
+  ['Chart cancelada on surface',      resolve('grafico-cancelada'),  resolve('superficie'),      3.0],
+
+  // The darkest sequential steps carry white labels inside heatmap cells.
+  ['White on sequential step 5',      WHITE,                        resolve('grafico-seq-5'),    4.5],
+  ['White on sequential step 6',      WHITE,                        resolve('grafico-seq-6'),    4.5],
+  ['Ink on sequential step 1',        resolve('tinta'),             resolve('grafico-seq-1'),    4.5],
+  ['Ink on sequential step 2',        resolve('tinta'),             resolve('grafico-seq-2'),    4.5],
 ]
 
 /* ------------------------------------------------------------------ report */
