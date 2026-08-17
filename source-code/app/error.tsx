@@ -27,7 +27,7 @@ export default function ErrorInesperado({
   }, [error])
 
   return (
-    <main className="min-h-screen bg-fondo">
+    <main className="grid min-h-screen place-items-center bg-fondo">
       <ErrorPage
         codigo="500"
         variante="roto"

@@ -9,7 +9,7 @@ export const metadata = { title: 'Página no encontrada' }
 /** 404. Rendered outside the panel shell, so it carries its own way back. */
 export default function NoEncontrado() {
   return (
-    <main className="min-h-screen bg-fondo">
+    <main className="grid min-h-screen place-items-center bg-fondo">
       <ErrorPage
         codigo="404"
         variante="perdido"
