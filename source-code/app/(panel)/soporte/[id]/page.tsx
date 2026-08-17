@@ -6,6 +6,7 @@ import { notFound, useParams } from 'next/navigation'
 import { ArrowLeft, Paperclip, Send } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import { useEstadoVista } from '@/lib/demo-context'
 import { ticketPorId } from '@/lib/mock-data'
 import { TIPO_TICKET } from '@/lib/estados'
 import { fechaHora } from '@/lib/formato'
@@ -13,6 +14,8 @@ import { Button } from '@/components/ui/button'
 import { BadgeTicket } from '@/components/ui/badge'
 import { Avatar } from '@/components/ui/controls'
 import { Textarea } from '@/components/ui/input'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Dato, ListaDatos } from '@/components/ui/page'
 import { Marca } from '@/components/shell/sidebar'
 import { toast } from '@/components/ui/toast'
@@ -26,11 +29,27 @@ import { toast } from '@/components/ui/toast'
  */
 export default function TicketDetallePage() {
   const params = useParams<{ id: string }>()
+  const estadoVista = useEstadoVista()
   const ticket = ticketPorId(decodeURIComponent(params.id))
 
   const [respuesta, setRespuesta] = React.useState('')
 
   if (!ticket) notFound()
+
+  if (estadoVista === 'loading') {
+    return (
+      <>
+        <Skeleton className="h-28 w-full" />
+        <div className="mt-6 space-y-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full max-w-2xl" />
+          ))}
+        </div>
+      </>
+    )
+  }
+
+  const mensajes = estadoVista === 'empty' ? [] : ticket.mensajes
 
   return (
     <>
@@ -60,8 +79,19 @@ export default function TicketDetallePage() {
       </div>
 
       {/* --------------------------------------------------------- thread */}
+      {mensajes.length === 0 && (
+        <div className="rounded-lg border border-borde bg-superficie">
+          <EmptyState
+            compacto
+            ilustracion="lista"
+            titulo="Esta solicitud no tiene mensajes"
+            descripcion="En cuanto escribas o IF7SPORTS responda, la conversación aparecerá aquí."
+          />
+        </div>
+      )}
+
       <ol className="space-y-4">
-        {ticket.mensajes.map((mensaje) => (
+        {mensajes.map((mensaje) => (
           <li
             key={mensaje.id}
             // The polideportivo's own messages sit on the right, as in any chat;

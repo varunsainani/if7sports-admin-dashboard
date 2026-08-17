@@ -107,6 +107,18 @@ interface BookingDetailModalProps {
 export function BookingDetailModal({ reserva, abierto, onOpenChange }: BookingDetailModalProps) {
   const [notas, setNotas] = React.useState('')
 
+  /**
+   * This modal is opened from a calendar chip, a dashboard row or a history
+   * row, never from a DialogTrigger, so Radix has nothing to hand focus back
+   * to and closing dropped the user at the top of the document. In a 7 by 14
+   * grid that means losing your place entirely.
+   */
+  const origenFoco = React.useRef<HTMLElement | null>(null)
+
+  React.useEffect(() => {
+    if (abierto) origenFoco.current = document.activeElement as HTMLElement | null
+  }, [abierto])
+
   React.useEffect(() => {
     setNotas(reserva?.notasInternas ?? '')
   }, [reserva])
@@ -125,7 +137,14 @@ export function BookingDetailModal({ reserva, abierto, onOpenChange }: BookingDe
 
   return (
     <Dialog open={abierto} onOpenChange={onOpenChange}>
-      <DialogContent ancho="lg" aria-describedby={undefined}>
+      <DialogContent
+        ancho="lg"
+        aria-describedby={undefined}
+        onCloseAutoFocus={(evento) => {
+          evento.preventDefault()
+          origenFoco.current?.focus()
+        }}
+      >
         <DialogHeader>
           <div className="flex flex-wrap items-center gap-2.5">
             <DialogTitle>Reserva {reserva.id}</DialogTitle>

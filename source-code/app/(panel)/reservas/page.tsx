@@ -180,12 +180,14 @@ function VistaSemanal({
   bloqueos,
   canchaFiltro,
   onAbrir,
+  onSlotLibre,
 }: {
   ancla: string
   reservas: Reserva[]
   bloqueos: ReturnType<typeof bloqueosEntre>
   canchaFiltro: string
   onAbrir: (reserva: Reserva) => void
+  onSlotLibre: (fecha: string, hora: string) => void
 }) {
   const inicio = inicioDeSemana(ancla)
   const dias = Array.from({ length: 7 }, (_, i) => desplazarDias(inicio, i))
@@ -260,11 +262,23 @@ function VistaSemanal({
                   )
 
                   if (!reserva) {
+                    // A free slot is the natural place to start a booking, and
+                    // an inert cell next to a clickable one reads as broken.
                     return (
-                      <div
+                      <button
                         key={fecha}
-                        className="h-9 rounded-sm border border-dashed border-borde bg-cal-50"
-                      />
+                        type="button"
+                        onClick={() => onSlotLibre(fecha, hhmm)}
+                        title={`Reservar ${cancha.nombre} el ${fecha} a las ${hhmm}`}
+                        className={cn(
+                          'h-9 rounded-sm border border-dashed border-borde bg-cal-50',
+                          'transition-colors duration-rapida hover:border-primario hover:bg-cesped-50'
+                        )}
+                      >
+                        <span className="sr-only">
+                          Franja libre. Reservar {cancha.nombre} a las {hhmm}.
+                        </span>
+                      </button>
                     )
                   }
 
@@ -537,6 +551,11 @@ function CalendarioReservas() {
               bloqueos={bloqueos}
               canchaFiltro={canchaFiltro}
               onAbrir={abrir}
+              onSlotLibre={(fecha, hora) =>
+                toast.info('Nueva reserva manual', {
+                  descripcion: `Aquí se abriría el alta para el ${fecha} a las ${hora}.`,
+                })
+              }
             />
           )}
 

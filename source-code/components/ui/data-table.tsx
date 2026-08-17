@@ -108,7 +108,13 @@ export function DataTable<TData>({
       )}
 
       {cargando ? (
-        <SkeletonTabla filas={porPagina} columnas={columns.length} />
+        // Match the number of rows that will actually appear, otherwise the
+        // table jumps when the data lands, which reads as a bug rather than as
+        // loading finishing.
+        <SkeletonTabla
+          filas={Math.max(1, Math.min(porPagina, data.length || porPagina))}
+          columnas={columns.length}
+        />
       ) : sinResultados ? (
         vacio
       ) : (

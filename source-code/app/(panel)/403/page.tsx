@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { Home, LifeBuoy } from 'lucide-react'
 
+import { useDemo } from '@/lib/demo-context'
+import { primeraRutaPermitida } from '@/lib/navegacion'
 import { Button } from '@/components/ui/button'
 import { ErrorPage } from '@/components/ui/error-page'
 
@@ -14,6 +16,12 @@ import { ErrorPage } from '@/components/ui/error-page'
  * again, because retrying will not help and they need to know who to ask.
  */
 export default function SinPermiso() {
+  const { puedeVer } = useDemo()
+
+  // Never point at "/": a user who lacks the dashboard's module would land
+  // straight back on this page.
+  const salida = primeraRutaPermitida(puedeVer)
+
   return (
     <ErrorPage
       codigo="403"
@@ -23,9 +31,9 @@ export default function SinPermiso() {
       acciones={
         <>
           <Button asChild>
-            <Link href="/">
+            <Link href={salida}>
               <Home aria-hidden />
-              Volver al panel
+              Ir a un módulo disponible
             </Link>
           </Button>
           <Button variant="secundario" asChild>

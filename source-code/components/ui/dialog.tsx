@@ -68,7 +68,10 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
-      {children}
+      {/* Before children on purpose. Rendered after, it made whatever field
+          came first in the body the modal's initial focus, so opening a booking
+          put the cursor in the internal notes and a stray keystroke edited
+          them. */}
       {!sinCerrar && (
         <DialogPrimitive.Close
           className={cn(
@@ -80,6 +83,7 @@ const DialogContent = React.forwardRef<
           <span className="sr-only">Cerrar</span>
         </DialogPrimitive.Close>
       )}
+      {children}
     </DialogPrimitive.Content>
   </DialogPortal>
 ))

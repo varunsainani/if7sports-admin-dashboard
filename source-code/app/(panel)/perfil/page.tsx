@@ -5,13 +5,14 @@ import { useSearchParams } from 'next/navigation'
 import { Copy, LogOut, Save, ShieldCheck, Smartphone } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { useDemo } from '@/lib/demo-context'
+import { useDemo, useEstadoVista } from '@/lib/demo-context'
 import { ROL } from '@/lib/estados'
 import { Button } from '@/components/ui/button'
 import { Avatar, CheckboxCampo, Switch } from '@/components/ui/controls'
 import { Campo, Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { PageHeader, Section } from '@/components/ui/page'
+import { PageHeader, PageHeaderSkeleton, Section } from '@/components/ui/page'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/components/ui/toast'
 
@@ -110,6 +111,7 @@ const SECCIONES = ['datos', 'password', '2fa', 'notificaciones'] as const
 
 function Perfil() {
   const { usuario } = useDemo()
+  const estadoVista = useEstadoVista()
   const searchParams = useSearchParams()
   const [dosFactores, setDosFactores] = React.useState(true)
 
@@ -122,6 +124,20 @@ function Perfil() {
   const [seccion, setSeccion] = React.useState<string>(inicial)
 
   React.useEffect(() => setSeccion(inicial), [inicial])
+
+  if (estadoVista === 'loading') {
+    return (
+      <>
+        <PageHeaderSkeleton />
+        <Skeleton className="h-10 w-full" />
+        <div className="mt-5 max-w-2xl space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-16" />
+          ))}
+        </div>
+      </>
+    )
+  }
 
   return (
     <>

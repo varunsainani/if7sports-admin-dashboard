@@ -71,6 +71,8 @@ export default function ConfiguracionPage() {
   const estadoVista = useEstadoVista()
   const [horarios, setHorarios] = React.useState(polideportivo.horarios)
 
+  const vacio = estadoVista === 'empty'
+
   if (estadoVista === 'loading') {
     return (
       <>
@@ -132,7 +134,7 @@ export default function ConfiguracionPage() {
       <Section titulo="Imágenes" descripcion="Las ven los clientes al buscar el polideportivo.">
         <Card>
           <CardContent className="grid gap-3 pt-5 sm:grid-cols-2 lg:grid-cols-4">
-            {polideportivo.imagenes.map((imagen) => (
+            {(vacio ? [] : polideportivo.imagenes).map((imagen) => (
               <div
                 key={imagen}
                 className="group relative overflow-hidden rounded-lg border border-borde bg-cal-100"
@@ -251,15 +253,15 @@ export default function ConfiguracionPage() {
             <div>
               <CardTitle className="text-base">Calendario anual 2026</CardTitle>
               <CardDescription>
-                {polideportivo.festivos.filter((f) => f.tipo === 'cerrado').length} días cerrados y{' '}
-                {polideportivo.festivos.filter((f) => f.tipo === 'horario_especial').length} con
-                horario especial.
+                {vacio
+                  ? 'Todavía no has marcado ningún festivo ni cierre puntual.'
+                  : `${polideportivo.festivos.filter((f) => f.tipo === 'cerrado').length} días cerrados y ${polideportivo.festivos.filter((f) => f.tipo === 'horario_especial').length} con horario especial.`}
               </CardDescription>
             </div>
           </CardHeader>
 
           <ul className="divide-y divide-borde border-t border-borde">
-            {polideportivo.festivos.map((festivo) => (
+            {(vacio ? [] : polideportivo.festivos).map((festivo) => (
               <li key={festivo.id} className="flex flex-wrap items-center gap-4 px-5 py-3">
                 <span
                   className={cn(

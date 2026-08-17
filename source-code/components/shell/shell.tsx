@@ -1,11 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 import { cn } from '@/lib/utils'
 import { useDemo } from '@/lib/demo-context'
-import { TODOS_LOS_ITEMS, esRutaActiva } from '@/lib/navegacion'
+import { TODOS_LOS_ITEMS, esRutaActiva, primeraRutaPermitida } from '@/lib/navegacion'
 import { Footer } from './footer'
 import { Header } from './header'
 import { Sidebar } from './sidebar'
@@ -20,14 +20,24 @@ import SinPermiso from '@/app/(panel)/403/page'
  */
 function Guardia({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
   const { puedeVer } = useDemo()
 
   const item = TODOS_LOS_ITEMS.find((candidato) => esRutaActiva(candidato, pathname))
+  const denegado = Boolean(item && !puedeVer(item.modulo))
+
+  // The root route is the landing screen, so a user who cannot open it gets
+  // moved to their first available module rather than a 403 they cannot leave.
+  const destino = primeraRutaPermitida(puedeVer)
+
+  React.useEffect(() => {
+    if (denegado && pathname === '/') router.replace(destino)
+  }, [denegado, pathname, destino, router])
+
+  if (denegado) return pathname === '/' ? null : <SinPermiso />
 
   // Routes with no module of their own (Mi perfil, the 403 itself) are always
   // reachable: they belong to the person, not to a delegated module.
-  if (item && !puedeVer(item.modulo)) return <SinPermiso />
-
   return <>{children}</>
 }
 
@@ -57,6 +67,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen">
+      {/* First focusable element on the page. Without it a keyboard user tabs
+          through the whole sidebar and header before reaching the content. */}
+      <a
+        href="#contenido"
+        className={cn(
+          'sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50',
+          'focus:rounded focus:bg-primario focus:px-4 focus:py-2 focus:text-sm focus:text-white'
+        )}
+      >
+        Saltar al contenido
+      </a>
+
       <Sidebar plegado={plegado} onAlternar={() => setPlegado((valor) => !valor)} />
 
       <div
@@ -67,7 +89,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       >
         <Header />
 
-        <main className="flex-1 px-6 py-6">
+        <main id="contenido" tabIndex={-1} className="flex-1 px-6 py-6">
           <div className="mx-auto w-full max-w-contenido">
             <Guardia>{children}</Guardia>
           </div>

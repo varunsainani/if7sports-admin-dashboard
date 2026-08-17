@@ -118,6 +118,18 @@ export function etiquetaDeRuta(pathname: string): string {
   return porPrefijo?.etiqueta ?? 'Panel'
 }
 
+/**
+ * The first screen a given user can actually open.
+ *
+ * Needed because the Dashboard is gated on the reservas module, so a
+ * colaborador without it landed on the root route, hit the 403, and found its
+ * "volver al panel" button pointing back at the same 403. That is a trap with
+ * no way out, on the first screen those users see.
+ */
+export function primeraRutaPermitida(puedeVer: (modulo: Modulo) => boolean): string {
+  return TODOS_LOS_ITEMS.find((item) => item.href !== '/' && puedeVer(item.modulo))?.href ?? '/perfil'
+}
+
 export function esRutaActiva(item: ItemNav, pathname: string): boolean {
   if (item.href === '/') return pathname === '/'
   if (item.coincidePrefijo) return pathname === item.href || pathname.startsWith(`${item.href}/`)
