@@ -62,6 +62,27 @@
 }
 
 @layer components {
+  /* ---------------------------------------------------------- display face
+     Archivo is loaded with its width axis, but requesting the axis only makes
+     it available. Without setting a value the browser renders the default
+     width and the face reads as any other grotesque, which loses the whole
+     point of choosing it. 112% is wide enough to feel like signage and still
+     narrow enough for a long Spanish heading to fit on one line. */
+  .font-display,
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-stretch: 112%;
+  }
+
+  /* Metric figures and page titles carry it further, since they sit alone and
+     have the room. */
+  .display-ancho {
+    font-family: var(--fuente-display);
+    font-stretch: 125%;
+  }
+
   /* ------------------------------------------------------------- bloqueos
      A blocked franja reads as a taped-off section of court. The hatch is the
      brief's required "patrón visual distinto" and costs no extra hue. */
