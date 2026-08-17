@@ -1,8 +1,14 @@
 /* ==========================================================================
    IF7SPORTS Admin Dashboard - Design tokens
    --------------------------------------------------------------------------
-   Palette is drawn from the materials of a sports facility: chalk line paint,
-   pitch turf, slate. Names are Spanish to match the product language.
+   Palette is drawn from the materials of a sports facility: warm stone, pitch
+   turf under floodlight, and the brass of a trophy. Names are Spanish to match
+   the product language.
+
+   Three grounds, not two. The navigation rail is a deep pitch green, the page
+   is warm stone and the cards are white. An interface where the rail, the page
+   and the cards are all near-white has nothing anchoring it, which is what made
+   the earlier palette read as "just white and green".
 
    Colour rule for this system: hue is reserved for BOOKING STATUS, because the
    brief requires the four states to be distinguishable at a glance in a dense
@@ -13,31 +19,58 @@
 
 :root {
   /* ---------------------------------------------------------------- neutrals
-     "cal" is the lime wash used to paint court lines. Cool and chalky rather
-     than warm cream, so the interface reads as an instrument, not a document. */
-  --cal-50: #f7f9f8;
-  --cal-100: #f1f4f3;
-  --cal-200: #e4eae8;
-  --cal-300: #d9e0de;
-  --cal-400: #b6c2bf;
-  --cal-500: #8a9a96;
-  --cal-600: #5c6b67;
-  --cal-700: #3d4a47;
-  --cal-800: #24322e;
-  --cal-900: #12211e;
+     Warm stone. A cool grey reads clinical and, next to a single green, reads
+     as an unfinished template; a warm neutral reads considered and lets the
+     brass sit beside it without clashing. */
+  --cal-50: #faf9f7;
+  --cal-100: #f2f0e9;
+  --cal-200: #e8e5dc;
+  --cal-300: #dedbd3;
+  --cal-400: #c0bbb0;
+  --cal-500: #918b7f;
+  --cal-600: #635e57;
+  --cal-700: #44403a;
+  --cal-800: #2a2723;
+  --cal-900: #191713;
 
   /* ------------------------------------------------------------------ primary
-     "cesped" is pitch turf. Deep enough to carry white text at every size. */
-  --cesped-50: #eaf3f0;
-  --cesped-100: #cfe3dd;
-  --cesped-200: #a0c7bd;
-  --cesped-300: #6ba598;
-  --cesped-400: #3b8375;
-  --cesped-500: #0e5c4f;
-  --cesped-600: #0b4c41;
-  --cesped-700: #093d34;
-  --cesped-800: #072e28;
-  --cesped-900: #04201b;
+     "cesped" is pitch turf. Richer and a step brighter than before, so it holds
+     its own against the dark rail instead of disappearing into it. */
+  --cesped-50: #e9f3ef;
+  --cesped-100: #cbe4da;
+  --cesped-200: #9bcbba;
+  --cesped-300: #5faa93;
+  --cesped-400: #2c8a70;
+  --cesped-500: #0b6b57;
+  --cesped-600: #095745;
+  --cesped-700: #074436;
+  --cesped-800: #0a2f27;
+  --cesped-900: #08201b;
+
+  /* ------------------------------------------------------------------- brass
+     "laton" is the second voice. With one accent, green had to carry the brand,
+     the primary action and the confirmada status at once, which is why the
+     interface read as two colours. Brass takes the ornamental work: key
+     figures, the active rail marker, highlights and the facility mark. It is
+     never used for a status, and never for a destructive action. */
+  --laton-50: #fbf6ea;
+  --laton-100: #f3e7c9;
+  --laton-200: #e4ce98;
+  --laton-300: #cfae63;
+  --laton-500: #9a7628;
+  --laton-600: #7f6020;
+  --laton-700: #5f4717;
+
+  /* ---------------------------------------------------------- navigation rail
+     The dark ground that anchors the whole screen. Its own scale, because it is
+     a surface in its own right rather than a tint of the page. */
+  --rail: #08201b;
+  --rail-hover: #0e2e27;
+  --rail-activo: #12463a;
+  --rail-borde: #153a31;
+  --rail-texto: #b9ccc5;
+  --rail-texto-activo: #ffffff;
+  --rail-apagado: #7c978e;
 
   /* -------------------------------------------------------- semantic surfaces */
   --fondo: var(--cal-100);          /* page ground */
@@ -48,7 +81,7 @@
   /* Form control boundaries carry meaning, so WCAG asks for 3:1 against the
      surface behind them. cal-400 only reaches 1.83, hence a dedicated token:
      3.38 on white, 3.06 on the page ground. */
-  --borde-control: #7f8f8b;
+  --borde-control: #8d877b;
   --tinta: var(--cal-900);          /* primary text */
   --tinta-media: var(--cal-700);    /* secondary text */
   --apagado: var(--cal-600);        /* captions, meta */
@@ -56,6 +89,10 @@
   --primario-hover: var(--cesped-600);
   --primario-suave: var(--cesped-50);
   --sobre-primario: #ffffff;
+  --acento: var(--laton-600);
+  --acento-suave: var(--laton-50);
+  --acento-borde: var(--laton-200);
+  --sobre-acento: #ffffff;
 
   /* ============================================================ estado reserva
      Each state carries a hue AND a fill treatment, so the four remain readable
@@ -68,25 +105,25 @@
      Note completada is deliberately NOT green. Confirmada is the state that
      matters operationally and earns the primary; completada is archive. */
 
-  --pendiente-bg: #faf0e2;
-  --pendiente-borde: #e3bc85;
-  --pendiente-texto: #8a5011;
+  --pendiente-bg: #fbf1e1;
+  --pendiente-borde: #e2bd83;
+  --pendiente-texto: #855012;
   /* Deepened from #c4761b, which only reached 3.53 against white and failed AA
      for the solid badge. This sits at 4.57 and still reads clearly as amber. */
   --pendiente-solido: #a96617;
 
-  --confirmada-bg: #e7f1ee;
-  --confirmada-borde: #9cc5bb;
-  --confirmada-texto: #0b4a3f;
-  --confirmada-solido: #0e5c4f;
+  --confirmada-bg: #e6f2ed;
+  --confirmada-borde: #93c6b4;
+  --confirmada-texto: #08513f;
+  --confirmada-solido: #0b6b57;
 
-  --cancelada-bg: #faeceb;
-  --cancelada-borde: #e0a5a1;
-  --cancelada-texto: #8a2621;
+  --cancelada-bg: #fbedea;
+  --cancelada-borde: #e0a49d;
+  --cancelada-texto: #8a2620;
   --cancelada-solido: #b0342e;
 
-  --completada-bg: #eceff4;
-  --completada-borde: #a9b6c6;
+  --completada-bg: #edeff3;
+  --completada-borde: #a7b3c3;
   --completada-texto: #33455a;
   --completada-solido: #40566e;
 
@@ -206,11 +243,24 @@
   --radio-full: 999px;
 
   /* ================================================================ shadows
-     Restrained. The ground is light, so depth comes from borders, not blur. */
-  --sombra-sm: 0 1px 2px rgba(18, 33, 30, 0.05);
-  --sombra-md: 0 2px 8px rgba(18, 33, 30, 0.07);
-  --sombra-lg: 0 8px 28px rgba(18, 33, 30, 0.11);
-  --sombra-modal: 0 24px 64px rgba(18, 33, 30, 0.20);
+     Layered rather than a single blur: a tight contact shadow to seat the
+     surface, and a wider soft one for the lift. Borders alone kept every plane
+     at the same height, which is most of why the interface read as flat.
+     Tinted with the warm ink so shadows never look grey on stone. */
+  --sombra-sm:
+    0 1px 1px rgba(25, 23, 19, 0.04),
+    0 1px 3px rgba(25, 23, 19, 0.06);
+  --sombra-md:
+    0 1px 2px rgba(25, 23, 19, 0.05),
+    0 4px 12px rgba(25, 23, 19, 0.07);
+  --sombra-lg:
+    0 2px 4px rgba(25, 23, 19, 0.05),
+    0 12px 32px rgba(25, 23, 19, 0.10);
+  --sombra-modal:
+    0 4px 8px rgba(25, 23, 19, 0.08),
+    0 32px 72px rgba(25, 23, 19, 0.24);
+  /* The rail sits above the page and casts onto it. */
+  --sombra-rail: 1px 0 0 rgba(25, 23, 19, 0.06), 4px 0 24px rgba(25, 23, 19, 0.05);
 
   /* ================================================================= motion */
   --duracion-rapida: 120ms;

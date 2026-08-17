@@ -122,7 +122,7 @@ export function PanelGrafico({
   resumen,
 }: PanelGraficoProps) {
   return (
-    <section className={cn('rounded-lg border border-borde bg-superficie', className)}>
+    <section className={cn('rounded-lg border border-borde bg-superficie shadow-sm', className)}>
       <div className="flex flex-wrap items-start justify-between gap-3 px-5 pb-2 pt-4">
         <div>
           <h3 className="font-display text-base font-semibold text-tinta">{titulo}</h3>

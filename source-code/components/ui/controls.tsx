@@ -185,9 +185,12 @@ function Avatar({ nombre, src, size = 'md', className }: AvatarProps) {
           className="aspect-square size-full object-cover"
         />
       )}
+      {/* Brass rather than green: initials appear on every people-bearing
+          table, so this is where the second accent earns its keep, and it keeps
+          green reserved for actions and booking status. */}
       <AvatarPrimitive.Fallback
         delayMs={src ? 300 : 0}
-        className="flex size-full items-center justify-center bg-cesped-50 font-display font-semibold text-cesped-700"
+        className="flex size-full items-center justify-center bg-laton-50 font-display font-semibold text-laton-700"
       >
         {iniciales(nombre)}
       </AvatarPrimitive.Fallback>

@@ -39,6 +39,27 @@ const config: Config = {
           900: 'var(--cesped-900)',
         },
 
+        laton: {
+          50: 'var(--laton-50)',
+          100: 'var(--laton-100)',
+          200: 'var(--laton-200)',
+          300: 'var(--laton-300)',
+          500: 'var(--laton-500)',
+          600: 'var(--laton-600)',
+          700: 'var(--laton-700)',
+        },
+
+        // The navigation rail is a surface of its own, not a tint of the page.
+        rail: {
+          DEFAULT: 'var(--rail)',
+          hover: 'var(--rail-hover)',
+          activo: 'var(--rail-activo)',
+          borde: 'var(--rail-borde)',
+          texto: 'var(--rail-texto)',
+          'texto-activo': 'var(--rail-texto-activo)',
+          apagado: 'var(--rail-apagado)',
+        },
+
         fondo: 'var(--fondo)',
         superficie: 'var(--superficie)',
         'superficie-alt': 'var(--superficie-alt)',
@@ -53,6 +74,12 @@ const config: Config = {
           hover: 'var(--primario-hover)',
           suave: 'var(--primario-suave)',
           fg: 'var(--sobre-primario)',
+        },
+        acento: {
+          DEFAULT: 'var(--acento)',
+          suave: 'var(--acento-suave)',
+          borde: 'var(--acento-borde)',
+          fg: 'var(--sobre-acento)',
         },
 
         // Booking status. Used as bg-pendiente-bg, text-pendiente-texto, etc.
@@ -161,6 +188,7 @@ const config: Config = {
         md: 'var(--sombra-md)',
         lg: 'var(--sombra-lg)',
         modal: 'var(--sombra-modal)',
+        rail: 'var(--sombra-rail)',
       },
 
       maxWidth: {

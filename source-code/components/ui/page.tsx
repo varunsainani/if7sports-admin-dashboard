@@ -25,6 +25,7 @@ function PageHeader({ titulo, descripcion, acciones, className }: PageHeaderProp
   return (
     <div className={cn('mb-6 flex flex-wrap items-start justify-between gap-4', className)}>
       <div className="min-w-0">
+        <span className="mb-2 block h-0.5 w-8 rounded-full bg-laton-300" aria-hidden />
         <h1 className="font-display text-2xl font-semibold tracking-display text-tinta">{titulo}</h1>
         {descripcion && <p className="mt-1 max-w-2xl text-base text-apagado">{descripcion}</p>}
       </div>
@@ -97,10 +98,14 @@ function MetricCard({
   const IconoVariacion = sinCambio ? Minus : sube ? ArrowUpRight : ArrowDownRight
 
   return (
-    <div className={cn('rounded-lg border border-borde bg-superficie p-5', className)}>
+    <div className={cn('rounded-lg border border-borde bg-superficie p-5 shadow-sm', className)}>
       <div className="flex items-start justify-between gap-3">
         <p className="etiqueta">{etiqueta}</p>
-        {icono && <span className="shrink-0 text-cal-500 [&_svg]:size-4">{icono}</span>}
+        {icono && (
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-laton-50 text-laton-600 [&_svg]:size-3.5">
+            {icono}
+          </span>
+        )}
       </div>
 
       <p className="mt-2 font-display text-3xl font-semibold tracking-display text-tinta numeros-tabulares">

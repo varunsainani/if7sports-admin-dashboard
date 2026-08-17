@@ -107,6 +107,18 @@ const pairs = [
   ['Control border on surface',       resolve('borde-control'),     resolve('superficie'),       3.0],
   ['Control border on page ground',   resolve('borde-control'),     resolve('fondo'),            3.0],
 
+  // brass, the second accent
+  ['Brass text on surface',           resolve('acento'),            resolve('superficie'),       4.5],
+  ['Brass text on brass tint',        resolve('laton-700'),         resolve('acento-suave'),     4.5],
+  ['White on brass',                  WHITE,                        resolve('acento'),           4.5],
+
+  // the navigation rail is its own surface, so its text is checked against it
+  ['Rail text on rail',               resolve('rail-texto'),        resolve('rail'),             4.5],
+  ['Rail text on rail hover',         resolve('rail-texto'),        resolve('rail-hover'),       4.5],
+  ['Rail active text',                resolve('rail-texto-activo'), resolve('rail-activo'),      4.5],
+  ['Rail group label',                resolve('rail-apagado'),      resolve('rail'),             4.5],
+  ['Brass marker on rail',            resolve('laton-300'),         resolve('rail'),             3.0],
+
   // Chart marks are non-text too, so 3:1 against the surface they sit on.
   // Colour-vision separation between these four is checked separately with the
   // palette validator; this only covers their visibility against the surface.

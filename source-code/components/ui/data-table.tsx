@@ -100,7 +100,7 @@ export function DataTable<TData>({
   const cargando = estado === 'loading'
 
   return (
-    <div className={cn('rounded-lg border border-borde bg-superficie', className)}>
+    <div className={cn('rounded-lg border border-borde bg-superficie shadow-sm', className)}>
       {toolbar && (
         <div className="flex flex-wrap items-center gap-3 border-b border-borde px-4 py-3">
           {toolbar}
