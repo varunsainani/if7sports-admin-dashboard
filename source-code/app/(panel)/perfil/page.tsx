@@ -9,7 +9,7 @@ import { useDemo, useEstadoVista } from '@/lib/demo-context'
 import { ROL } from '@/lib/estados'
 import { Button } from '@/components/ui/button'
 import { Avatar, CheckboxCampo, Switch } from '@/components/ui/controls'
-import { Campo, Input } from '@/components/ui/input'
+import { Campo, Input, InputContrasena } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { PageHeader, PageHeaderSkeleton, Section } from '@/components/ui/page'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -203,7 +203,7 @@ function Perfil() {
           <Card className="max-w-xl">
             <CardContent className="space-y-4 pt-5">
               <Campo etiqueta="Contraseña actual" htmlFor="password-actual" requerido>
-                <Input id="password-actual" type="password" autoComplete="current-password" />
+                <InputContrasena id="password-actual" autoComplete="current-password" />
               </Campo>
 
               <Campo
@@ -212,11 +212,11 @@ function Perfil() {
                 requerido
                 ayuda="Al menos 10 caracteres, con una mayúscula y un número."
               >
-                <Input id="password-nueva" type="password" autoComplete="new-password" />
+                <InputContrasena id="password-nueva" autoComplete="new-password" />
               </Campo>
 
               <Campo etiqueta="Repite la nueva contraseña" htmlFor="password-repetir" requerido>
-                <Input id="password-repetir" type="password" autoComplete="new-password" />
+                <InputContrasena id="password-repetir" autoComplete="new-password" />
               </Campo>
 
               <Button onClick={() => toast.exito('Contraseña cambiada')}>
