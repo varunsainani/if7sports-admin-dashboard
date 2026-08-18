@@ -168,6 +168,13 @@
   }
 }
 
+/* Edge draws a native reveal control inside password fields. The product
+   supplies its own toggle, and both together read as a rendering fault. */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
 /* A restrained scrollbar. The default on Linux and Windows is heavy enough to
    distort the density of the tables. */
 @supports selector(::-webkit-scrollbar) {
