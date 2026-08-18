@@ -8,7 +8,7 @@ import { ArrowLeft, KeyRound, MailCheck, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { polideportivo } from '@/lib/mock-data'
 import { Button } from '@/components/ui/button'
-import { Campo, Input } from '@/components/ui/input'
+import { Campo, Input, InputContrasena } from '@/components/ui/input'
 import { Marca } from '@/components/shell/sidebar'
 import { Toaster, toast } from '@/components/ui/toast'
 
@@ -146,9 +146,8 @@ export default function LoginPage() {
                 </Campo>
 
                 <Campo etiqueta="Contraseña" htmlFor="login-password" requerido>
-                  <Input
+                  <InputContrasena
                     id="login-password"
-                    type="password"
                     autoComplete="current-password"
                     defaultValue="demo1234"
                   />
@@ -263,7 +262,7 @@ export default function LoginPage() {
                 }}
               >
                 <Campo etiqueta="Contraseña temporal" htmlFor="cambio-temporal" requerido>
-                  <Input id="cambio-temporal" type="password" autoComplete="current-password" />
+                  <InputContrasena id="cambio-temporal" autoComplete="current-password" />
                 </Campo>
 
                 <Campo
@@ -272,11 +271,11 @@ export default function LoginPage() {
                   requerido
                   ayuda="Al menos 10 caracteres, con una mayúscula y un número."
                 >
-                  <Input id="cambio-nueva" type="password" autoComplete="new-password" />
+                  <InputContrasena id="cambio-nueva" autoComplete="new-password" />
                 </Campo>
 
                 <Campo etiqueta="Repite la nueva contraseña" htmlFor="cambio-repetir" requerido>
-                  <Input id="cambio-repetir" type="password" autoComplete="new-password" />
+                  <InputContrasena id="cambio-repetir" autoComplete="new-password" />
                 </Campo>
 
                 <Button type="submit" size="lg" className="w-full">
