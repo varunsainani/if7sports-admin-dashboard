@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "gen:icons": "python3 scripts/generate-icons.py"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.2.6",
